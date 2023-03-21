@@ -12,9 +12,9 @@ class ChessEngine:
     def process_move(self, move_from, move_to, promotion):
         self.move_count += 1
         pgn = f"{self.move_count}. {move_from}{move_to}"
-
         if self.move_count == 1:
-            prompt = f"We are playing a chess game. At every turn, repeat all the moves that have already been made. Find the best response for Black. I'm White and the game starts with 1.e4\n\nPGN of game so far: {pgn}\n\nBest move:"
+            #1.e4 is currently hardcoded but need to be adjusted depending on the first move
+            prompt = f"We are playing a chess game. At every turn, repeat all the moves that have already been made. Find the best response for Black. I'm White and the game starts with {pgn}\n\nPGN of game so far: {pgn}\n\nBest move:"
             gpt_response = self.get_gpt_response(prompt)
 
             return gpt_response

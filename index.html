@@ -120,7 +120,7 @@
           },
           success: function (response) {
             console.log(response);
-            if (engine_instance.move_count === 1) {
+            if (response.bestMove) {
               var bestMove = response.bestMove;
               game.move(bestMove, { sloppy: true });
               board1.position(game.fen());

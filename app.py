@@ -24,7 +24,12 @@ def move():
     move_from = request.form.get('from')
     move_to = request.form.get('to')
     promotion = request.form.get('promotion')
+    print("result")
     result = engine_instance.process_move(move_from, move_to, promotion)
+    print(result)
+    #currently i only send a parseable result if it was the first move 
+    print(engine_instance.move_count)
+    #currently i have my prompt fixed but need to be adjusted 
     if engine_instance.move_count == 1:
         # Parse the best move from the GPT response
         best_move = result.split("Best move:")[-1].strip()

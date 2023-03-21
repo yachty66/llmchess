@@ -2,75 +2,111 @@
 <html>
   <head>
     <title>Chess</title>
-    <link rel="stylesheet" href="css/chessboard-1.0.0.min.css">
+    <link
+      rel="stylesheet"
+      href="{{url_for('static', filename='css/chessboard-1.0.0.min.css')}}"
+    />
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-    <script src="js/chessboard-1.0.0.min.js"></script>
+    <script src="{{url_for('static', filename='js/chessboard-1.0.0.min.js')}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.min.js"></script>
   </head>
   <body>
     <div id="board1" style="width: 400px"></div>
+    <button id="getBestMove">Get Best Move</button>
+
     <script>
-        var board1,
-            game = new Chess();
+      var board1,
+        game = new Chess();
 
-        var config = {
-            draggable: true,
-            position: 'start',
-            onDragStart: onDragStart,
-            onDrop: onDrop,
-            onMouseoutSquare: onMouseoutSquare,
-            onMouseoverSquare: onMouseoverSquare,
-            onSnapEnd: onSnapEnd
-        };
+      var config = {
+        draggable: true,
+        position: "start",
+        onDragStart: onDragStart,
+        onDrop: onDrop,
+        onMouseoutSquare: onMouseoutSquare,
+        onMouseoverSquare: onMouseoverSquare,
+        onSnapEnd: onSnapEnd,
+      };
 
-        board1 = ChessBoard('board1', config);
+      board1 = ChessBoard("board1", config);
 
-        function onDragStart (source, piece, position, orientation) {
-            // Do not pick up pieces if the game is over
-            if (game.in_checkmate() === true || game.in_draw() === true) {
-                return false;
-            }
-
-            // Only pick up pieces for the side to move
-            if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-                (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
-                return false;
-            }
+      function onDragStart(source, piece, position, orientation) {
+        // Do not pick up pieces if the game is over
+        if (game.in_checkmate() === true || game.in_draw() === true) {
+          return false;
         }
 
-        function onDrop (source, target) {
-            // See if the move is legal
-            var move = game.move({
-                from: source,
-                to: target,
-                promotion: 'q' // NOTE: always promote to a queen for simplicity
-            });
+        // Only pick up pieces for the side to move
+        if (
+          (game.turn() === "w" && piece.search(/^b/) !== -1) ||
+          (game.turn() === "b" && piece.search(/^w/) !== -1)
+        ) {
+          return false;
+        }
+      }
 
-            // Illegal move
-            if (move === null) {
-                return 'snapback';
-            }
+      function onDrop(source, target) {
+        // See if the move is legal
+        var move = game.move({
+          from: source,
+          to: target,
+          promotion: "q", // NOTE: always promote to a queen for simplicity
+        });
 
-            // Update the board position after a legal move
-            updateStatus();
+        // Illegal move
+        if (move === null) {
+          return "snapback";
         }
 
-        function onMouseoverSquare (square, piece) {
-            // Add any interaction when the mouse is over a square
-        }
+        // Update the board position after a legal move
+        updateStatus();
+      }
 
-        function onMouseoutSquare (square, piece) {
-            // Add any interaction when the mouse leaves a square
-        }
+      function onMouseoverSquare(square, piece) {
+        // Add any interaction when the mouse is over a square
+      }
 
-        function onSnapEnd () {
-            // Update the board position after the piece snap
+      function onMouseoutSquare(square, piece) {
+        // Add any interaction when the mouse leaves a square
+      }
+
+      function onSnapEnd() {
+        // Update the board position after the piece snap
+        board1.position(game.fen());
+      }
+
+      function updateStatus() {
+        // Update game status, e.g., checkmate, draw, etc.
+      }
+
+      function simpleRequest() {
+        $.ajax({
+          url: "/hello",
+          method: "GET",
+          success: function (response) {
+            console.log(response);
+          },
+        });
+      }
+
+      function getBestMove() {
+        var currentFen = game.fen();
+
+        $.ajax({
+          url: "/best_move",
+          method: "POST",
+          data: { fen: currentFen },
+          success: function (response) {
+            var bestMove = response.move;
+            game.move(bestMove, { sloppy: true });
             board1.position(game.fen());
-        }
-
-        function updateStatus() {
-            // Update game status, e.g., checkmate, draw, etc.
-        }
+          },
+        });
+      }
+      // Add this line at the end of your JavaScript code
+      document
+        .getElementById("getBestMove")
+        .addEventListener("click", getBestMove);
     </script>
   </body>
 </html>

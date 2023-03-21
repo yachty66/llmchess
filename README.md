@@ -2,7 +2,11 @@
 
 can i use lichess as an wrapper somehow? fuck that i will do it from scratch with python. here the idea is to
 
-- [ ] make only legal moves possible
+- [x] make only legal moves possible
+- [ ] 
+
+
+What are the next steps??? what can i do now.. what can i dooooo now. i have no plan. i should start with the engine because thatgw
 
 
 

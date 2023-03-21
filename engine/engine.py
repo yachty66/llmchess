@@ -8,21 +8,23 @@ openai.api_key = OPENAI_API_KEY
 class ChessEngine:
     def __init__(self):
         self.move_count = 0
+        self.pgn_history = []
 
     def process_move(self, move_from, move_to, promotion):
         self.move_count += 1
-        pgn = f"{self.move_count}. {move_from}{move_to}"
-        if self.move_count == 1:
-            #1.e4 is currently hardcoded but need to be adjusted depending on the first move
-            prompt = f"We are playing a chess game. At every turn, repeat all the moves that have already been made. Find the best response for Black. I'm White and the game starts with {pgn}\n\nPGN of game so far: {pgn}\n\nBest move:"
-            gpt_response = self.get_gpt_response(prompt)
+        pgn = f"{move_from}{move_to}"
+        self.pgn_history.append(pgn)
 
-            return gpt_response
+        # Join the PGN history with alternating numbers and moves
+        pgn_string = " ".join(
+            f"{i // 2 + 1}. {move}" if i % 2 == 0 else move
+            for i, move in enumerate(self.pgn_history)
+        )
 
-        # Add any additional logic for processing moves here
-        # ...
+        prompt = f"We are playing a chess game. At every turn, repeat all the moves that have already been made. Find the best response for {'Black' if self.move_count % 2 == 1 else 'White'}. I'm {'White' if self.move_count % 2 == 0 else 'Black'} and the game starts with {self.pgn_history[0]}\n\nPGN of game so far: {pgn_string}\n\nBest move:"
+        gpt_response = self.get_gpt_response(prompt)
 
-        return "Move processed"
+        return gpt_response
     
     def get_gpt_response(self, prompt):
         url = "https://api.openai.com/v1/chat/completions"

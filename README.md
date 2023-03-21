@@ -16,7 +16,11 @@ can i use lichess as an wrapper somehow? fuck that i will do it from scratch wit
 - [x] send each move to server and log first
 - [x] detect if a move was the first move or not.
 - [x] if move was first move send request to openai 
-- [ ] add to prompt the value of the first move 
+- [x] add to prompt the value of the first move 
+- [ ] 
+
+
+next i want to extend the game to next moves.
 
 this is going to be legendary. so much fun. i started becoming a pretty fast typer. 
 

@@ -120,9 +120,18 @@
           },
           success: function (response) {
             console.log(response);
+            // Check if response.bestMove exists
             if (response.bestMove) {
-              var bestMove = response.bestMove;
-              game.move(bestMove, { sloppy: true });
+              var best_move = response.bestMove;
+            } else {
+              // Fallback to parsing the string if response.bestMove is not available
+              var best_move = response
+                .split("Best move:")[1]
+                ?.trim()
+                .split(" ")[0];
+            }
+            if (best_move) {
+              game.move(best_move, { sloppy: true });
               board1.position(game.fen());
             }
           },

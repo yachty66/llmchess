@@ -1,9 +1,26 @@
 # llmchess
 
+My engine is inside engine.py. I want to send each move to the engine. if the move is the first move i want to return "first move". What do i need to implement in my engine.py for that and what do i habve to add in my app.py?
+
+stephen wolfram has great ambition for his age. respect.
+
+
 can i use lichess as an wrapper somehow? fuck that i will do it from scratch with python. here the idea is to
 
 - [x] make only legal moves possible
-- [ ] 
+- [x] fix rochade
+- [x] send each move to server and log first
+- [x] detect if a move was the first move or not.
+- [ ] if move was first move send request to openai 
+
+this is going to be legendary. so much fun. i started becoming a pretty fast typer. 
+
+i make a move 
+
+
+now chess engine. after each move i need to send fen string to server. 
+
+ich zug --> fen string server --> engine --> mit prompt und game state to gpt --> check if move possible in engine --> move back to js 
 
 
 What are the next steps??? what can i do now.. what can i dooooo now. i have no plan. i should start with the engine because thatgw
@@ -18,6 +35,7 @@ What are the next steps??? what can i do now.. what can i dooooo now. i have no 
     - [ ] twitter 
     - [ ] discord 
     - [ ] freedom slack (before fix bot)
+    - [ ] slack channel agi house 
 
 
 ## Notes

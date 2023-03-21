@@ -15,6 +15,20 @@
     <button id="getBestMove">Get Best Move</button>
 
     <script>
+      function updatePositionWithLoad(chess, source, target, piece) {
+        // Remove the piece from the source square
+        chess.remove(source);
+
+        // Put the piece on the target square
+        chess.put(piece, target);
+
+        // Generate the FEN string for the updated position
+        var updatedFen = chess.fen();
+
+        // Load the position from the FEN string to update en passant square and castling flags
+        chess.load(updatedFen);
+      }
+
       var img_url =
         "{{ url_for('static', filename='img/chesspieces/wikipedia/') }}";
       var board1,
@@ -28,7 +42,7 @@
         onMouseoutSquare: onMouseoutSquare,
         onMouseoverSquare: onMouseoverSquare,
         onSnapEnd: onSnapEnd,
-        pieceTheme: img_url + '{piece}.png', 
+        pieceTheme: img_url + "{piece}.png",
       };
 
       board1 = ChessBoard("board1", config);
@@ -61,6 +75,9 @@
           return "snapback";
         }
 
+        // Send the move to the server
+        sendMoveToServer(move);
+
         // Update the board position after a legal move
         updateStatus();
       }
@@ -88,6 +105,26 @@
           method: "GET",
           success: function (response) {
             console.log(response);
+          },
+        });
+      }
+
+      function sendMoveToServer(move) {
+        $.ajax({
+          url: "/move",
+          method: "POST",
+          data: {
+            from: move.from,
+            to: move.to,
+            promotion: move.promotion,
+          },
+          success: function (response) {
+            console.log(response);
+            if (engine_instance.move_count === 1) {
+              var bestMove = response.bestMove;
+              game.move(bestMove, { sloppy: true });
+              board1.position(game.fen());
+            }
           },
         });
       }

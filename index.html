@@ -102,9 +102,7 @@
           url: "/move",
           method: "POST",
           data: {
-            from: move.from,
-            to: move.to,
-            promotion: move.promotion,
+            pgn: game.pgn(),
           },
           success: function (response) {
             console.log(response);
@@ -113,10 +111,7 @@
               var move = response.move;
             } else {
               // Fallback to parsing the string if response.bestMove is not available
-              var move = response
-                .split("move:")[1]
-                ?.trim()
-                .split(" ")[0];
+              var move = response.split("move:")[1]?.trim().split(" ")[0];
             }
             if (move) {
               game.move(move, { sloppy: true });

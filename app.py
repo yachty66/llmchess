@@ -10,24 +10,8 @@ def index():
 
 @app.route('/move', methods=['POST'])
 def move():
-    move_from = request.form.get('from')
-    move_to = request.form.get('to')
-    promotion = request.form.get('promotion')
-    result = engine_instance.process_move(move_from, move_to, promotion)
-    # Parse the best move from the GPT response
-    '''if '...' in result:
-        best_move = result.split("...")[-1].strip().split(".")[0]
-    elif 'Best move:' in result:
-        best_move = result.split("Best move:")[-1].strip()
-    elif 'The PGN of the game now becomes:' in result:
-        best_move = result.split("\n")[-3].strip().split(" ")[-1].strip()
-    else:
-        best_move = result.split("\n")[-1].strip().split(" ")[0]'''
-
-    # Append the assistant's message to the messages list
-    #assistant_message = {"role": "assistant", "content": f"PGN of game so far:\n\n{' '.join(engine_instance.pgn_history)}\nBest move: {best_move}"}
-    #engine_instance.messages.append(assistant_message)
-
+    pgn = request.form.get('pgn')
+    result = engine_instance.process_move_pgn(pgn)
     return {"move": result}
     
 if __name__ == '__main__':

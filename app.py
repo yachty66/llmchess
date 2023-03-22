@@ -15,21 +15,21 @@ def move():
     promotion = request.form.get('promotion')
     result = engine_instance.process_move(move_from, move_to, promotion)
     # Parse the best move from the GPT response
-    if '...' in result:
+    '''if '...' in result:
         best_move = result.split("...")[-1].strip().split(".")[0]
     elif 'Best move:' in result:
         best_move = result.split("Best move:")[-1].strip()
     elif 'The PGN of the game now becomes:' in result:
         best_move = result.split("\n")[-3].strip().split(" ")[-1].strip()
     else:
-        best_move = result.split("\n")[-1].strip().split(" ")[0]
+        best_move = result.split("\n")[-1].strip().split(" ")[0]'''
 
     # Append the assistant's message to the messages list
-    assistant_message = {"role": "assistant", "content": f"PGN of game so far:\n\n{' '.join(engine_instance.pgn_history)}\nBest move: {best_move}"}
-    engine_instance.messages.append(assistant_message)
+    #assistant_message = {"role": "assistant", "content": f"PGN of game so far:\n\n{' '.join(engine_instance.pgn_history)}\nBest move: {best_move}"}
+    #engine_instance.messages.append(assistant_message)
 
-    return {"bestMove": best_move}
-
+    return {"move": result}
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=81, debug=True)
 

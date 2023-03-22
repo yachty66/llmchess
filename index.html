@@ -109,17 +109,17 @@
           success: function (response) {
             console.log(response);
             // Check if response.bestMove exists
-            if (response.bestMove) {
-              var best_move = response.bestMove;
+            if (response.move) {
+              var move = response.move;
             } else {
               // Fallback to parsing the string if response.bestMove is not available
-              var best_move = response
-                .split("Best move:")[1]
+              var move = response
+                .split("move:")[1]
                 ?.trim()
                 .split(" ")[0];
             }
-            if (best_move) {
-              game.move(best_move, { sloppy: true });
+            if (move) {
+              game.move(move, { sloppy: true });
               board1.position(game.fen());
             }
           },

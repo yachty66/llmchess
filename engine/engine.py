@@ -1,14 +1,15 @@
 import openai
-import chess 
+import chess
 import json
 import requests
 from .config import OPENAI_API_KEY
 
 openai.api_key = OPENAI_API_KEY
 
+
 class ChessEngine:
     def __init__(self):
-        self.move_count = 0
+        self.move_count = 1
         self.board = chess.Board()
         self.messages = [
             {
@@ -23,28 +24,17 @@ class ChessEngine:
                 ),
             }
         ]
-        initial_response = self.get_gpt_response(self.messages)
-
-        # Extract the first move from the initial response
-        #TODO make dynamically
-        first_move = "e4"
-        self.board.push_san(first_move)
-        second_move = initial_response.split("Best move:")[-1].strip().split()[0]
-        self.board.push_san(second_move)
-        self.messages.append({"role": "assistant", "content": initial_response})
-
-
 
     def process_move(self, move_from, move_to, promotion):
-        '''
-        move comes inside.
-        1. make move from the initial response 
-        1. convert incoming move to png
-        '''
-        #if len of board two return second move 
-        if len(self.board.move_stack) == 2:
-            #return second move in uci
-            print(self.board.uci(chess.Move.from_uci(self.board.move_stack[1].uci())))
+        self.move_count += 1
+        if self.move_count == 2:
+            response = self.get_gpt_response(self.messages)
+            self.messages.append({"role": "assistant", "content": response})
+            #TODO can be checked if legal move 
+            move = response.split("Best move:")[-1].strip().split()[0]
+            # TODO make dynamically
+            self.board.push_san("e4")
+            self.board.push_san(move)
             return self.board.uci(chess.Move.from_uci(self.board.move_stack[1].uci()))
 
 
@@ -62,9 +52,7 @@ class ChessEngine:
         print("messages: ", messages)
         response = requests.post(url, headers=headers, data=json.dumps(payload))
         response_json = response.json()
-        return response_json['choices'][0]['message']['content'].strip()
-
+        return response_json["choices"][0]["message"]["content"].strip()
 
 
 engine_instance = ChessEngine()
-

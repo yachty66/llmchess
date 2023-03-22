@@ -45,6 +45,7 @@ What are the next steps??? what can i do now.. what can i dooooo now. i have no 
     - [ ] discord 
     - [ ] freedom slack (before fix bot)
     - [ ] slack channel agi house 
+    - [ ] visit show and tell event and present my idea
 
 
 ## Notes

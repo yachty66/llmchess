@@ -8,33 +8,27 @@ app = Flask(__name__,  template_folder='.')
 def index():
     return render_template('index.html')
 
-#ive created a post request "Hello world" from my js code. how can i send something back like "hello" 
-@app.route('/hello', methods=["GET", 'POST'])
-def hello():
-    return "hellohello"
-
-@app.route('/best_move', methods=["GET", 'POST'])
-def best_move():
-    fen = request.form.get('fen')
-    #best_move = engine.get_best_move(fen)
-    return jsonify(move=best_move)
-
 @app.route('/move', methods=['POST'])
 def move():
     move_from = request.form.get('from')
     move_to = request.form.get('to')
     promotion = request.form.get('promotion')
-    print("result")
     result = engine_instance.process_move(move_from, move_to, promotion)
-    print(result)
-    #currently i only send a parseable result if it was the first move 
-    print(engine_instance.move_count)
-    #currently i have my prompt fixed but need to be adjusted 
-    if engine_instance.move_count == 1:
-        # Parse the best move from the GPT response
+    # Parse the best move from the GPT response
+    if '...' in result:
+        best_move = result.split("...")[-1].strip().split(".")[0]
+    elif 'Best move:' in result:
         best_move = result.split("Best move:")[-1].strip()
-        return {"bestMove": best_move}
-    return result
+    elif 'The PGN of the game now becomes:' in result:
+        best_move = result.split("\n")[-3].strip().split(" ")[-1].strip()
+    else:
+        best_move = result.split("\n")[-1].strip().split(" ")[0]
+
+    # Append the assistant's message to the messages list
+    assistant_message = {"role": "assistant", "content": f"PGN of game so far:\n\n{' '.join(engine_instance.pgn_history)}\nBest move: {best_move}"}
+    engine_instance.messages.append(assistant_message)
+
+    return {"bestMove": best_move}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=81, debug=True)

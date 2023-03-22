@@ -12,8 +12,6 @@
   </head>
   <body>
     <div id="board1" style="width: 400px"></div>
-    <button id="getBestMove">Get Best Move</button>
-
     <script>
       function updatePositionWithLoad(chess, source, target, piece) {
         // Remove the piece from the source square
@@ -99,16 +97,6 @@
         // Update game status, e.g., checkmate, draw, etc.
       }
 
-      function simpleRequest() {
-        $.ajax({
-          url: "/hello",
-          method: "GET",
-          success: function (response) {
-            console.log(response);
-          },
-        });
-      }
-
       function sendMoveToServer(move) {
         $.ajax({
           url: "/move",
@@ -137,25 +125,6 @@
           },
         });
       }
-
-      function getBestMove() {
-        var currentFen = game.fen();
-
-        $.ajax({
-          url: "/best_move",
-          method: "POST",
-          data: { fen: currentFen },
-          success: function (response) {
-            var bestMove = response.move;
-            game.move(bestMove, { sloppy: true });
-            board1.position(game.fen());
-          },
-        });
-      }
-      // Add this line at the end of your JavaScript code
-      document
-        .getElementById("getBestMove")
-        .addEventListener("click", getBestMove);
     </script>
   </body>
 </html>

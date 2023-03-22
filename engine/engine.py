@@ -1,4 +1,5 @@
 import openai
+import chess 
 import json
 import requests
 from .config import OPENAI_API_KEY
@@ -8,25 +9,46 @@ openai.api_key = OPENAI_API_KEY
 class ChessEngine:
     def __init__(self):
         self.move_count = 0
-        self.pgn_history = []
+        self.board = chess.Board()
+        self.messages = [
+            {
+                "role": "system",
+                "content": (
+                    "We are playing a chess game. At every turn, repeat all the moves that have already been made."
+                    "Find the best response for Black. I'm White and the game starts with 1.e4\n\n"
+                    "So, to be clear, your output format should always be:\n\n"
+                    "PGN of game so far: ...\n\n"
+                    "Best move: ...\n\n"
+                    "and then I get to play my move."
+                ),
+            }
+        ]
+        initial_response = self.get_gpt_response(self.messages)
+
+        # Extract the first move from the initial response
+        #TODO make dynamically
+        first_move = "e4"
+        self.board.push_san(first_move)
+        second_move = initial_response.split("Best move:")[-1].strip().split()[0]
+        self.board.push_san(second_move)
+        self.messages.append({"role": "assistant", "content": initial_response})
+
+
 
     def process_move(self, move_from, move_to, promotion):
-        self.move_count += 1
-        pgn = f"{move_from}{move_to}"
-        self.pgn_history.append(pgn)
+        '''
+        move comes inside.
+        1. make move from the initial response 
+        1. convert incoming move to png
+        '''
+        #if len of board two return second move 
+        if len(self.board.move_stack) == 2:
+            #return second move in uci
+            print(self.board.uci(chess.Move.from_uci(self.board.move_stack[1].uci())))
+            return self.board.uci(chess.Move.from_uci(self.board.move_stack[1].uci()))
 
-        # Join the PGN history with alternating numbers and moves
-        pgn_string = " ".join(
-            f"{i // 2 + 1}. {move}" if i % 2 == 0 else move
-            for i, move in enumerate(self.pgn_history)
-        )
 
-        prompt = f"We are playing a chess game. At every turn, repeat all the moves that have already been made. Find the best response for {'Black' if self.move_count % 2 == 1 else 'White'}. I'm {'White' if self.move_count % 2 == 0 else 'Black'} and the game starts with {self.pgn_history[0]}\n\nPGN of game so far: {pgn_string}\n\nBest move:"
-        gpt_response = self.get_gpt_response(prompt)
-
-        return gpt_response
-    
-    def get_gpt_response(self, prompt):
+    def get_gpt_response(self, messages):
         url = "https://api.openai.com/v1/chat/completions"
         headers = {
             "Content-Type": "application/json",
@@ -34,30 +56,15 @@ class ChessEngine:
         }
         payload = {
             "model": "gpt-3.5-turbo",
-            "messages": [{"role": "user", "content": prompt}],
+            "messages": messages,
             "temperature": 0.7,
         }
+        print("messages: ", messages)
         response = requests.post(url, headers=headers, data=json.dumps(payload))
         response_json = response.json()
-        print(response_json)
         return response_json['choices'][0]['message']['content'].strip()
+
 
 
 engine_instance = ChessEngine()
 
-
-'''
-We are playing a chess game. At every turn, repeat all the moves that have already been made. Find the best response for Black. I'm White and the game starts with 1.e4
-
-So, to be clear, your output format should always be: 
-
-PGN of game so far: ... 
-
-Best move: ... 
-
-and then I get to play my move.
-'''
-
-# else send string in fen
-
-#check if move which comes back is legal. if not legal print no legal move and repreat prev request. always print full response 

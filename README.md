@@ -20,12 +20,14 @@ can i use lichess as an wrapper somehow? fuck that i will do it from scratch wit
     - [x] add gpt-4
 - [x] add start button
 - [x] add functionality that game is only starting if start button was clicked 
-- [ ] on click of start insert api key from input field and also model
-    - [ ] if that works turn start to stop and it should be possible to start the game
-    - [ ] else wrong key
+- [x] on click of start insert api key from input field and also model
+    - [x] fix bug of that key gets not inserted correctly 
+    - [x] if that works turn start to stop and it should be possible to start the game
 - [ ] add field for logs
 - [ ] add model responses in respective colors
 - [ ] on game end display respective butttons 
+
+- [ ] add analytics to site  
 
 need to think about the design of the game so that it makes sense. 
 
@@ -56,6 +58,8 @@ What are the next steps??? what can i do now.. what can i dooooo now. i have no 
     - [ ] freedom slack (before fix bot)
     - [ ] slack channel agi house 
     - [ ] visit show and tell event and present my idea
+    - [ ] share with alex mamuleanu
+    - [ ] share with berlin chess channel
 
 
 ## Notes

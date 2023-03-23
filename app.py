@@ -1,5 +1,5 @@
 from engine.engine import engine_instance
-#my folder path is called engine/engine.py. I cannot do from engine import engine_instance because of that. what do i need to do instead?
+import openai
 from flask import Flask, render_template, request, jsonify
 app = Flask(__name__,  template_folder='.')
 
@@ -22,6 +22,17 @@ def set_api_key():
     api_key = request.form.get('api_key')
     engine_instance.set_api_key(api_key)
     return {"status": "success"}
+
+@app.route('/check-api-key', methods=['POST'])
+def check_api_key():
+    api_key = request.form.get('api_key')
+    openai.api_key = api_key
+    try:
+        # Test the API key with a simple request
+        openai.Engine.list()
+        return {"status": "success"}
+    except openai.error.AuthenticationError:
+        return {"status": "failure"}
 
     
 if __name__ == '__main__':

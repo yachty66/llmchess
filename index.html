@@ -30,25 +30,57 @@
       document
         .getElementById("start-button")
         .addEventListener("click", function () {
+          // Check if the game is already started
+          if (gameStarted) {
+            location.reload();
+            return;
+          }
+
           // Get the API key from the input field
           var apiKey = document.getElementById("api-key-input").value;
 
-          // Send the API key to the server
-          $.ajax({
-            url: "/set-api-key",
-            method: "POST",
-            data: {
-              api_key: apiKey,
-            },
-            success: function (response) {
-              if (response.status === "success") {
-                gameStarted = true;
-                console.log("Game started");
-              } else {
-                console.log("Error setting the API key");
-              }
-            },
-          });
+          // Check if the input field is empty
+          if (apiKey.trim() === "") {
+            alert("Please enter a valid API key to start the game.");
+          } else {
+            // Check if the API key is valid
+            $.ajax({
+              url: "/check-api-key",
+              method: "POST",
+              data: {
+                api_key: apiKey,
+              },
+              success: function (response) {
+                if (response.status === "success") {
+                  // Send the API key to the server
+                  $.ajax({
+                    url: "/set-api-key",
+                    method: "POST",
+                    data: {
+                      api_key: apiKey,
+                    },
+                    success: function (response) {
+                      if (response.status === "success") {
+                        gameStarted = true;
+                        console.log("Game started");
+
+                        // Change the start button to end button
+                        var startButton =
+                          document.getElementById("start-button");
+                        startButton.textContent = "End";
+                      } else {
+                        console.log("Error setting the API key");
+                      }
+                    },
+                  });
+                } else {
+                  alert(
+                    "The provided API key is not valid. Please enter a valid API key."
+                  );
+                }
+              },
+            });
+          }
         });
 
       function updatePositionWithLoad(chess, source, target, piece) {

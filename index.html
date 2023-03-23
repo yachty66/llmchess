@@ -23,13 +23,21 @@
       </select>
       <button id="start-button">Start</button>
     </div>
-    <div id="board1" style="width: 400px"></div>
-    <div id="logs"></div>
-    <div>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</div>
+    <div class="game-container" style="display: flex">
+      <div id="board1" style="width: 400px; margin-right: 50px"></div>
+      <div
+        id="log"
+        style="
+          width: 200px;
+          height: 400px;
+          border: 1px solid black;
+        "
+      ></div>
+    </div>
+    <div>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</div>
     <script src="https://cdn.socket.io/4.1.2/socket.io.min.js"></script>
     <script>
       var gameStarted = false;
-
       document
         .getElementById("start-button")
         .addEventListener("click", function () {
@@ -206,11 +214,23 @@
       );
 
       socket.on("log_message", function (msg) {
-        var logElement = document.createElement("p");
-        logElement.textContent = msg;
-        document.getElementById("logs").appendChild(logElement);
+        console.log("Received message:", msg);
+        displayLogMessage(msg);
       });
 
+      function displayLogMessage(message) {
+        const logContainer = document.getElementById("log");
+        const logEntry = document.createElement("div");
+
+        if (message.startsWith("LLM responded with illegal move")) {
+          logEntry.style.color = "red";
+        } else if (message.startsWith("LLM responded with")) {
+          logEntry.style.color = "green";
+        }
+
+        logEntry.textContent = message;
+        logContainer.appendChild(logEntry);
+      }
     </script>
   </body>
 </html>

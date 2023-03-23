@@ -39,12 +39,14 @@ class ChessEngine:
         try:
             print(self.board)
             self.board.push_san(move)
-            self.socketio.emit('log_message', f"Legal move: {move}") 
+            if self.move_count % 2 == 0:  # It's LLM's move
+                self.socketio.emit('log_message', f"LLM responded with \"{move}\"")
             return True
         except ValueError:
-            self.socketio.emit('log_message', f"Illegal move: {move}")
+            if self.move_count % 2 == 0:  # It's LLM's move
+                self.socketio.emit('log_message', f"LLM responded with illegal move \"{move}\". Repeat request.")
             return False
-
+        
     def process_move(self, move_from, move_to, promotion):
         print(self.move_count)
         self.move_count += 1

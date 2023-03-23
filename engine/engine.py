@@ -76,8 +76,10 @@ class ChessEngine:
         model="gpt-3.5-turbo",
         messages=messages
         )
-        print("completion")
-        print(completion.choices[0].message["content"].strip())
+        #print("completion")
+        #print(completion.choices[0].message["content"].strip())
+
+        #maybe the chat is not working if i send twice the same chat 
         return completion.choices[0].message["content"].strip()
     
 

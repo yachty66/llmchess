@@ -11,6 +11,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.min.js"></script>
   </head>
   <body>
+    <div id="input-container">
+      <input type="text" id="input1" placeholder="OpenAI Key" />
+      <select id="model-selector">
+        <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+        <option value="gpt-3.5-turbo-0301">gpt-3.5-turbo-0301</option>
+        <option value="gpt-4">gpt-4</option>
+        <option value="gpt-4-0314">gpt-4-0314</option>
+        <option value="gpt-4-32k">gpt-4-32k</option>
+        <option value="gpt-4-32k-0314">gpt-4-32k-0314</option>
+      </select>
+      <button id="start-button">Start</button>
+    </div>
     <div id="board1" style="width: 400px"></div>
     <script>
       function updatePositionWithLoad(chess, source, target, piece) {
@@ -113,10 +125,7 @@
               var move = response.move;
             } else {
               // Fallback to parsing the string if response.bestMove is not available
-              var move = response
-                .split("move:")[1]
-                ?.trim()
-                .split(" ")[0];
+              var move = response.split("move:")[1]?.trim().split(" ")[0];
             }
             if (move) {
               game.move(move, { sloppy: true });

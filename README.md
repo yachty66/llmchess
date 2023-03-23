@@ -17,7 +17,20 @@ can i use lichess as an wrapper somehow? fuck that i will do it from scratch wit
 - [x] detect if a move was the first move or not.
 - [x] if move was first move send request to openai 
 - [x] add to prompt the value of the first move 
-- [ ] 
+- [x] create a field for pasting the api key
+- [x] choose model options
+    - [x] add gpt turbo 
+    - [x] add gpt-4
+- [x] add start button
+- [ ] add functionality that game is only starting if start button was clicked 
+- [ ] on click of start insert api key from input field and also model
+    - [ ] if that works turn start to stop and it should be possible to start the game
+    - [ ] else wrong key
+- [ ] add field for logs
+- [ ] add model responses in respective colors
+- [ ] on game end display respective butttons 
+
+need to think about the design of the game so that it makes sense. 
 
 
 next i want to extend the game to next moves.

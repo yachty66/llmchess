@@ -30,19 +30,20 @@ class ChessEngine:
     #create a method which checks if the move is legal
     def is_legal_move(self, move):
         try:
+            print(self.board)
             self.board.push_san(move)
             return True
         except ValueError:
             return False
 
     def process_move(self, move_from, move_to, promotion):
+        print(self.move_count)
         self.move_count += 1
         if self.move_count == 2:
             # TODO make dynamically
             self.board.push_san("e4")
             response = self.get_gpt_response(self.messages)
             self.messages.append({"role": "assistant", "content": response})
-            # TODO can be checked if legal move
             move = response.split("Best move:")[-1].strip().split()[0]
             while True:
                 is_legal = self.is_legal_move(move)
@@ -51,31 +52,34 @@ class ChessEngine:
                 else:
                     response = self.get_gpt_response(self.messages)
                     move = response.split("Best move:")[-1].strip().split()[0]
-            #print("move", move)
-            #self.board.push_san(move)
             return self.board.uci(chess.Move.from_uci(self.board.move_stack[1].uci()))
         """
-        - [ ] make beginning always working
+        - [x] make beginning always working
         - [x] start loop 
         - [x] convert move to san
-        - [ ] make request with new move
-        - [ ] check if move is valid  
-        - [ ] if valid return move in uci and add to board
-        - [ ] if not print something and repeat
+        - [x] make request with new move
+        - [x] check if move is valid  
+        - [x] if valid return move in uci and add to board
+        - [x] if not print something and repeat
+        - [ ] find out why stop with responding
         """
+        san_move = self.board.san(chess.Move.from_uci(move_from + move_to))
+        self.messages.append({"role": "user", "content": f"{san_move}"})
+        self.board.push_san(san_move)
         while True:
-            san_move = self.board.san(chess.Move.from_uci(move_from + move_to))
-            self.messages.append({"role": "user", "content": f"{san_move}"})
             response = self.get_gpt_response(self.messages)
+            print("20*-")
+            print(response)
+            #get move from response
             move = response.split("Best move:")[-1].strip().split()[0]
-            print("move", move)
-            try:
-                self.board.push_san(move)
+            #validate move
+            #first need to add move to board
+            if self.is_legal_move(move):
                 self.messages.append({"role": "assistant", "content": response})
                 uci_move = self.board.peek().uci()
                 return uci_move
-            except ValueError:
-                print("not a legal move")
+            else:
+                print("not a legal move", move)
                 continue
 
     def get_gpt_response(self, messages):

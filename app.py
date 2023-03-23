@@ -1,9 +1,12 @@
-from engine.engine import engine_instance
+#from engine.engine import engine_instance
+from engine.engine import ChessEngine
 import openai
 from flask import Flask, render_template, request, jsonify
-#from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit
 app = Flask(__name__,  template_folder='.')
-#socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+engine_instance = ChessEngine(socketio)  
 
 @app.route('/')
 def index():
@@ -35,8 +38,8 @@ def check_api_key():
         return {"status": "success"}
     except openai.error.AuthenticationError:
         return {"status": "failure"}
-    
-'''@socketio.on('connect')
+
+@socketio.on('connect')
 def handle_connect():
     print('Client connected')
 
@@ -47,9 +50,8 @@ def handle_disconnect():
 @socketio.on('log_message')
 def handle_log_message(message):
     print('Received message:', message)
-    emit('log_message', message, broadcast=True)'''
+    emit('log_message', message, broadcast=True)
 
-    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=81, debug=True)
 

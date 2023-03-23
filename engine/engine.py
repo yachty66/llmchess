@@ -1,5 +1,6 @@
 import openai
-
+from flask_socketio import SocketIO, emit
+#import socketio
 import time
 import threading
 import chess
@@ -12,7 +13,8 @@ from .config import OPENAI_API_KEY
 openai.api_key = OPENAI_API_KEY
 
 class ChessEngine:
-    def __init__(self):
+    def __init__(self, socketio):
+        self.socketio = socketio
         self.move_count = 1
         self.board = chess.Board()
         self.messages = [
@@ -37,8 +39,10 @@ class ChessEngine:
         try:
             print(self.board)
             self.board.push_san(move)
+            self.socketio.emit('log_message', f"Legal move: {move}") 
             return True
         except ValueError:
+            self.socketio.emit('log_message', f"Illegal move: {move}")
             return False
 
     def process_move(self, move_from, move_to, promotion):
@@ -83,5 +87,6 @@ class ChessEngine:
         messages=messages
         )
         return completion.choices[0].message["content"].strip()
-    
-engine_instance = ChessEngine()
+
+#engine_instance = ChessEngine()
+#engine_instance = ChessEngine(socketio)

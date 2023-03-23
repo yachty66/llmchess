@@ -24,6 +24,9 @@
       <button id="start-button">Start</button>
     </div>
     <div id="board1" style="width: 400px"></div>
+    <div id="logs"></div>
+    <div>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</div>
+    <script src="https://cdn.socket.io/4.1.2/socket.io.min.js"></script>
     <script>
       var gameStarted = false;
 
@@ -197,6 +200,16 @@
           },
         });
       }
+
+      var socket = io.connect(
+        "http://" + document.domain + ":" + location.port
+      );
+
+      socket.on("log_message", function (msg) {
+        var logElement = document.createElement("p");
+        logElement.textContent = msg;
+        document.getElementById("logs").appendChild(logElement);
+      });
 
     </script>
   </body>

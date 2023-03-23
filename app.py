@@ -1,7 +1,9 @@
 from engine.engine import engine_instance
 import openai
 from flask import Flask, render_template, request, jsonify
+#from flask_socketio import SocketIO, emit
 app = Flask(__name__,  template_folder='.')
+#socketio = SocketIO(app, cors_allowed_origins="*")
 
 @app.route('/')
 def index():
@@ -33,6 +35,19 @@ def check_api_key():
         return {"status": "success"}
     except openai.error.AuthenticationError:
         return {"status": "failure"}
+    
+'''@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
+
+@socketio.on('log_message')
+def handle_log_message(message):
+    print('Received message:', message)
+    emit('log_message', message, broadcast=True)'''
 
     
 if __name__ == '__main__':

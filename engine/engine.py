@@ -1,4 +1,7 @@
 import openai
+
+import time
+import threading
 import chess
 import chess.pgn
 import io
@@ -7,7 +10,6 @@ import requests
 from .config import OPENAI_API_KEY
 
 openai.api_key = OPENAI_API_KEY
-
 
 class ChessEngine:
     def __init__(self):
@@ -30,7 +32,6 @@ class ChessEngine:
     def set_api_key(self, api_key):
         openai.api_key = api_key
         print(openai.api_key)
-
 
     def is_legal_move(self, move):
         try:

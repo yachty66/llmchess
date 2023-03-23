@@ -3,15 +3,18 @@ from engine.engine import engine_instance
 from flask import Flask, render_template, request, jsonify
 app = Flask(__name__,  template_folder='.')
 
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/move', methods=['POST'])
 def move():
-    pgn = request.form.get('pgn')
-    result = engine_instance.process_move_pgn(pgn)
+    move_from = request.form.get('from')
+    move_to = request.form.get('to')
+    promotion = request.form.get('promotion')
+    result = engine_instance.process_move(move_from, move_to, promotion)
+    '''pgn = request.form.get('pgn')
+    result = engine_instance.process_move_pgn(pgn)'''
     return {"move": result}
     
 if __name__ == '__main__':

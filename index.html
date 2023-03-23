@@ -12,7 +12,7 @@
   </head>
   <body>
     <div id="input-container">
-      <input type="text" id="input1" placeholder="OpenAI Key" />
+      <input type="text" id="api-key-input" placeholder="OpenAI Key" />
       <select id="model-selector">
         <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
         <option value="gpt-3.5-turbo-0301">gpt-3.5-turbo-0301</option>
@@ -25,6 +25,32 @@
     </div>
     <div id="board1" style="width: 400px"></div>
     <script>
+      var gameStarted = false;
+
+      document
+        .getElementById("start-button")
+        .addEventListener("click", function () {
+          // Get the API key from the input field
+          var apiKey = document.getElementById("api-key-input").value;
+
+          // Send the API key to the server
+          $.ajax({
+            url: "/set-api-key",
+            method: "POST",
+            data: {
+              api_key: apiKey,
+            },
+            success: function (response) {
+              if (response.status === "success") {
+                gameStarted = true;
+                console.log("Game started");
+              } else {
+                console.log("Error setting the API key");
+              }
+            },
+          });
+        });
+
       function updatePositionWithLoad(chess, source, target, piece) {
         // Remove the piece from the source square
         chess.remove(source);
@@ -58,6 +84,11 @@
       board1 = ChessBoard("board1", config);
 
       function onDragStart(source, piece, position, orientation) {
+        // Do not pick up pieces if the game hasn't started
+        if (!gameStarted) {
+          return false;
+        }
+
         // Do not pick up pieces if the game is over
         if (game.in_checkmate() === true || game.in_draw() === true) {
           return false;

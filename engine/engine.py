@@ -27,6 +27,10 @@ class ChessEngine:
             }
         ]
 
+    def set_api_key(self, api_key):
+        openai.api_key = api_key
+
+
     def is_legal_move(self, move):
         try:
             print(self.board)

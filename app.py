@@ -16,6 +16,13 @@ def move():
     '''pgn = request.form.get('pgn')
     result = engine_instance.process_move_pgn(pgn)'''
     return {"move": result}
+
+@app.route('/set-api-key', methods=['POST'])
+def set_api_key():
+    api_key = request.form.get('api_key')
+    engine_instance.set_api_key(api_key)
+    return {"status": "success"}
+
     
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=81, debug=True)

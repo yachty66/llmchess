@@ -42,12 +42,10 @@ class ChessEngine:
     def is_legal_move(self, move):
         try:
             self.board.push_san(move)
-            if self.move_count % 2 == 0:  # It's LLM's move
-                self.socketio.emit('log_message', f"LLM responded with \"{move}\"")
+            self.socketio.emit('log_message', f"LLM responded with \"{move}\"")
             return True
         except ValueError:
-            if self.move_count % 2 == 0:  # It's LLM's move
-                self.socketio.emit('log_message', f"LLM responded with illegal move \"{move}\". Repeat request.")
+            self.socketio.emit('log_message', f"LLM responded with illegal move \"{move}\". Repeat request.")
             return False
         
     #white makes 
@@ -61,8 +59,7 @@ class ChessEngine:
             self.messages.append({"role": "assistant", "content": response})
             move = response.split("Best move:")[-1].strip().split()[0]
             while True:
-                is_legal = self.is_legal_move(move)
-                if is_legal:
+                if self.is_legal_move(move):
                     break
                 else:
                     response = self.get_gpt_response(self.messages)

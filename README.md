@@ -32,9 +32,10 @@ can i use lichess as an wrapper somehow? fuck that i will do it from scratch wit
 - [x] display waiting in log 
 - [x] set model according to selected model 
 - [x] check not only if key perse is working but make request with selcted model
-- [ ] add the second move to the board
+- [x] add the second move to the board --> generally fix problem that moves are not logged sometimes
 - [ ] fix problem that if first move is wrong
 - [ ] make content not overflowing
+- [ ] make on click of end button working - to reset all values if this button was clicked
 - [ ] on game end display respective butttons 
 
 - [ ] add analytics to site  

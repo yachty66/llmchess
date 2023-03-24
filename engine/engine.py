@@ -46,6 +46,7 @@ class ChessEngine:
                 self.socketio.emit('log_message', f"LLM responded with illegal move \"{move}\". Repeat request.")
             return False
         
+    #white makes 
     def process_move(self, move_from, move_to, promotion):
         print(self.move_count)
         self.move_count += 1

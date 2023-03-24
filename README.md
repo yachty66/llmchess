@@ -29,7 +29,9 @@ can i use lichess as an wrapper somehow? fuck that i will do it from scratch wit
     - [x] if that works turn start to stop and it should be possible to start the game
 - [x] add field for logs
 - [x] add model responses in respective colors
-- [ ] display waiting in log 
+- [x] display waiting in log 
+- [ ] add the second move to the board
+- [ ] fix problem that if first move is wrong
 - [ ] make content not overflowing
 - [ ] on game end display respective butttons 
 

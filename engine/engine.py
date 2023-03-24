@@ -56,10 +56,10 @@ class ChessEngine:
             # TODO make dynamically
             self.board.push_san("e4")
             response = self.get_gpt_response(self.messages)
-            self.messages.append({"role": "assistant", "content": response})
             move = response.split("Best move:")[-1].strip().split()[0]
             while True:
                 if self.is_legal_move(move):
+                    self.messages.append({"role": "assistant", "content": response})
                     break
                 else:
                     response = self.get_gpt_response(self.messages)

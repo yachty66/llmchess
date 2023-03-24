@@ -8,9 +8,6 @@ import chess.pgn
 import io
 import json
 import requests
-from .config import OPENAI_API_KEY
-
-openai.api_key = OPENAI_API_KEY
 
 class ChessEngine:
     def __init__(self, socketio):

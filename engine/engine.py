@@ -10,7 +10,7 @@ import json
 import requests
 
 class ChessEngine:
-    def __init__(self, socketio):
+    def __init__(self, socketio, api_key=None, model=None):
         self.socketio = socketio
         self.move_count = 1
         self.board = chess.Board()
@@ -27,15 +27,15 @@ class ChessEngine:
                 ),
             }
         ]
-        self.model = ""
         self.game_over = False
-
-    def set_api_key(self, api_key):
-        openai.api_key = api_key
-
-    def set_model(self, model):
-        print("model", model)
+        self.api_key = api_key
         self.model = model
+
+    def set_api_key(self):
+        openai.api_key = self.api_key
+
+    def set_model(self):
+        self.model = self.model
 
     def is_legal_move(self, move):
         #check here if game is over and in this case send log to the frontend.
@@ -83,7 +83,7 @@ class ChessEngine:
                 continue
 
     def get_gpt_response(self, messages):
-        url = "https://api.openai.com/v1/chat/completions"
+        #url = "https://api.openai.com/v1/chat/completions"
         completion = openai.ChatCompletion.create(
         model=self.model,
         messages=messages

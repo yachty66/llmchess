@@ -30,7 +30,6 @@
     <div class="game-container" style="display: flex">
       <div id="spinner" style="display: none">
         <img
-          src="{{url_for('static', filename='img/spinner.gif')}}"
           alt="Loading..."
         />
       </div>
@@ -55,9 +54,26 @@
     <div></div>
     <script src="https://cdn.socket.io/4.1.2/socket.io.min.js"></script>
     <script>
+      function createNewSession() {
+        return new Promise((resolve, reject) => {
+          $.ajax({
+            url: "/new-session",
+            method: "GET",
+            success: function (response) {
+              if (response.session_id) {
+                resolve(response.session_id);
+              } else {
+                reject("Error creating new session");
+              }
+            },
+            error: function (error) {
+              reject(error);
+            },
+          });
+        });
+      }
       var gameStarted = false;
       var selectedModel = document.getElementById("model-selector").value;
-
       document
         .getElementById("model-selector")
         .addEventListener("change", function () {
@@ -66,7 +82,7 @@
 
       document
         .getElementById("start-button")
-        .addEventListener("click", function () {
+        .addEventListener("click", async function () {
           // Check if the game is already started
           if (gameStarted) {
             location.reload();
@@ -97,7 +113,7 @@
                       api_key: apiKey,
                       model: selectedModel,
                     },
-                    success: function (response) {
+                    success: async function (response) {
                       if (response.status === "success") {
                         gameStarted = true;
                         console.log("Game started");
@@ -106,6 +122,14 @@
                         var startButton =
                           document.getElementById("start-button");
                         startButton.textContent = "End";
+
+                        // Create new session
+                        try {
+                          const sessionId = await createNewSession();
+                          console.log("New session created:", sessionId);
+                        } catch (error) {
+                          console.error("Error creating new session:", error);
+                        }
                       } else {
                         console.log("Error setting the API key");
                       }
@@ -292,9 +316,12 @@
         });
       }
 
+
       var socket = io.connect(
         "http://" + document.domain + ":" + location.port
       );
+
+      
 
       socket.on("log_message", function (msg) {
         console.log("Received message:", msg);

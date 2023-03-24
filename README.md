@@ -34,6 +34,8 @@ can i use lichess as an wrapper somehow? fuck that i will do it from scratch wit
 - [x] make content not overflowing
 - [x] check if checkmate is working --> checkmate, stalemate, draw
 - [ ] put it online
+    - [ ] make sessions working  
+    - [ ] make it with a log file working instead of sockets
 
 
 - [ ] make on click of end button working - to reset all values if this button was clicked (test that in production setting)

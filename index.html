@@ -52,7 +52,7 @@
         Waiting for the LLM to respond...
       </div>
     </div>
-    <div></div>
+    <div>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</div>
     <script src="https://cdn.socket.io/4.1.2/socket.io.min.js"></script>
     <script>
       var gameStarted = false;
@@ -207,7 +207,43 @@
       }
 
       function updateStatus() {
-        // Update game status, e.g., checkmate, draw, etc.
+        var status = "";
+
+        var moveColor = game.turn() === "w" ? "White" : "Black";
+
+        // check for checkmate
+        if (game.in_checkmate()) {
+          status = "Game over, " + moveColor + " is in checkmate.";
+        }
+
+        // check for draw
+        else if (game.in_draw()) {
+          status = "Game over, drawn position";
+        }
+
+        // check for stalemate
+        else if (game.in_stalemate()) {
+          status = "Game over, stalemate";
+        }
+
+        // check for threefold repetition
+        else if (game.in_threefold_repetition()) {
+          status = "Game over, threefold repetition";
+        }
+
+        // check for insufficient material
+        else if (game.insufficient_material()) {
+          status = "Game over, insufficient material";
+        }
+
+        // check for 50-move rule
+        else if (game.half_moves >= 100) {
+          status = "Game over, 50-move rule";
+        }
+
+        if (status !== "") {
+          displayLogMessage(status);
+        }
       }
 
       function sendMoveToServer(move) {
@@ -237,6 +273,7 @@
             if (move) {
               game.move(move, { sloppy: true });
               board1.position(game.fen());
+              updateStatus(); 
             }
           },
         });

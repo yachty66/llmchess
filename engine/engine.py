@@ -50,7 +50,8 @@ class ChessEngine:
         
     #white makes 
     def process_move(self, move_from, move_to, promotion):
-        #can remove all prints and than check if each move gets registered 
+        #i need to check if the game is over
+        #can check that in legal move check
         self.move_count += 1
         if self.move_count == 2:
             # TODO make dynamically

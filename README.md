@@ -31,10 +31,11 @@ can i use lichess as an wrapper somehow? fuck that i will do it from scratch wit
 - [x] check not only if key perse is working but make request with selcted model
 - [x] add the second move to the board --> generally fix problem that moves are not logged sometimes
 - [x] fix problem that if first move is wrong
-- [ ] make content not overflowing
-- [ ] make on click of end button working - to reset all values if this button was clicked
-- [ ] on game end display respective butttons 
+- [x] make content not overflowing
+- [ ] check if checkmate is working --> checkmate, stalemate, draw
 
+
+- [ ] make on click of end button working - to reset all values if this button was clicked (test that in production setting)
 - [ ] add analytics to site  
 
 need to think about the design of the game so that it makes sense. 

@@ -22,7 +22,10 @@
         <option value="gpt-4-32k-0314">gpt-4-32k-0314</option>
       </select>
       <button id="start-button">Start</button>
-      <div>(make sure you choose a model which is working with your api key otherwise its not working)</div>
+      <div>
+        (make sure you choose a model which is working with your api key
+        otherwise its not working)
+      </div>
     </div>
     <div class="game-container" style="display: flex">
       <div id="spinner" style="display: none">
@@ -35,13 +38,21 @@
       <div id="board1" style="width: 400px; margin-right: 50px"></div>
       <div
         id="log"
-        style="width: 200px; height: 400px; border: 1px solid black"
+        style="
+          width: 200px;
+          height: 400px;
+          border: 1px solid black;
+          overflow-y: auto;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+        "
       ></div>
+
       <div id="waiting-message" style="display: none">
         Waiting for the LLM to respond...
       </div>
     </div>
-    <div>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</div>
+    <div></div>
     <script src="https://cdn.socket.io/4.1.2/socket.io.min.js"></script>
     <script>
       var gameStarted = false;

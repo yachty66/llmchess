@@ -1,8 +1,5 @@
 # llmchess
 
-
-
-
 Now finishing the project today.  
 
 My engine is inside engine.py. I want to send each move to the engine. if the move is the first move i want to return "first move". What do i need to implement in my engine.py for that and what do i habve to add in my app.py?
@@ -33,7 +30,7 @@ can i use lichess as an wrapper somehow? fuck that i will do it from scratch wit
 - [x] set model according to selected model 
 - [x] check not only if key perse is working but make request with selcted model
 - [x] add the second move to the board --> generally fix problem that moves are not logged sometimes
-- [ ] fix problem that if first move is wrong
+- [x] fix problem that if first move is wrong
 - [ ] make content not overflowing
 - [ ] make on click of end button working - to reset all values if this button was clicked
 - [ ] on game end display respective butttons 

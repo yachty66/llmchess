@@ -22,6 +22,7 @@
         <option value="gpt-4-32k-0314">gpt-4-32k-0314</option>
       </select>
       <button id="start-button">Start</button>
+      <div>(make sure you choose a model which is working with your api key otherwise its not working)</div>
     </div>
     <div class="game-container" style="display: flex">
       <div id="spinner" style="display: none">
@@ -40,10 +41,18 @@
         Waiting for the LLM to respond...
       </div>
     </div>
-    <div>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</div>
+    <div>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</div>
     <script src="https://cdn.socket.io/4.1.2/socket.io.min.js"></script>
     <script>
       var gameStarted = false;
+      var selectedModel = document.getElementById("model-selector").value;
+
+      document
+        .getElementById("model-selector")
+        .addEventListener("change", function () {
+          selectedModel = this.value;
+        });
+
       document
         .getElementById("start-button")
         .addEventListener("click", function () {
@@ -75,6 +84,7 @@
                     method: "POST",
                     data: {
                       api_key: apiKey,
+                      model: selectedModel,
                     },
                     success: function (response) {
                       if (response.status === "success") {

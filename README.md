@@ -30,6 +30,8 @@ can i use lichess as an wrapper somehow? fuck that i will do it from scratch wit
 - [x] add field for logs
 - [x] add model responses in respective colors
 - [x] display waiting in log 
+- [x] set model according to selected model 
+- [x] check not only if key perse is working but make request with selcted model
 - [ ] add the second move to the board
 - [ ] fix problem that if first move is wrong
 - [ ] make content not overflowing

@@ -25,7 +25,9 @@ def move():
 @app.route('/set-api-key', methods=['POST'])
 def set_api_key():
     api_key = request.form.get('api_key')
+    model = request.form.get('model')
     engine_instance.set_api_key(api_key)
+    engine_instance.set_model(model)
     return {"status": "success"}
 
 @app.route('/check-api-key', methods=['POST'])

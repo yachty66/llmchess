@@ -26,17 +26,21 @@ class ChessEngine:
                     "So, to be clear, your output format should always be:\n\n"
                     "PGN of game so far: ...\n\n"
                     "Best move: ...\n\n"
-                    "and then I get to play my move."
+                    "and then I get to play my move. Do not include the move number'."
                 ),
             }
         ]
+        self.model = ""
 
     def set_api_key(self, api_key):
         openai.api_key = api_key
 
+    def set_model(self, model):
+        print("model", model)
+        self.model = model
+
     def is_legal_move(self, move):
         try:
-            print(self.board)
             self.board.push_san(move)
             if self.move_count % 2 == 0:  # It's LLM's move
                 self.socketio.emit('log_message', f"LLM responded with \"{move}\"")
@@ -48,7 +52,7 @@ class ChessEngine:
         
     #white makes 
     def process_move(self, move_from, move_to, promotion):
-        print(self.move_count)
+        #can remove all prints and than check if each move gets registered 
         self.move_count += 1
         if self.move_count == 2:
             # TODO make dynamically
@@ -68,9 +72,7 @@ class ChessEngine:
         self.messages.append({"role": "user", "content": f"{san_move}"})
         self.board.push_san(san_move)
         while True:
-            print("next round")
             response = self.get_gpt_response(self.messages)
-            print("response",response)
             move = response.split("Best move:")[-1].strip().split()[0]
             if self.is_legal_move(move):
                 self.messages.append({"role": "assistant", "content": response})
@@ -82,12 +84,8 @@ class ChessEngine:
 
     def get_gpt_response(self, messages):
         url = "https://api.openai.com/v1/chat/completions"
-        print("messages", messages)
         completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-0301",
+        model=self.model,
         messages=messages
         )
         return completion.choices[0].message["content"].strip()
-
-#engine_instance = ChessEngine()
-#engine_instance = ChessEngine(socketio)

@@ -32,7 +32,8 @@ can i use lichess as an wrapper somehow? fuck that i will do it from scratch wit
 - [x] add the second move to the board --> generally fix problem that moves are not logged sometimes
 - [x] fix problem that if first move is wrong
 - [x] make content not overflowing
-- [ ] check if checkmate is working --> checkmate, stalemate, draw
+- [x] check if checkmate is working --> checkmate, stalemate, draw
+- [ ] put it online
 
 
 - [ ] make on click of end button working - to reset all values if this button was clicked (test that in production setting)

@@ -52,7 +52,7 @@
         Waiting for the LLM to respond...
       </div>
     </div>
-    <div>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</div>
+    <div></div>
     <script src="https://cdn.socket.io/4.1.2/socket.io.min.js"></script>
     <script>
       var gameStarted = false;
@@ -186,11 +186,24 @@
           return "snapback";
         }
 
-        // Send the move to the server
-        sendMoveToServer(move);
-
         // Update the board position after a legal move
         updateStatus();
+
+        // Check if the game is over
+        if (
+          game.in_checkmate() ||
+          game.in_draw() ||
+          game.in_stalemate() ||
+          game.in_threefold_repetition() ||
+          game.insufficient_material() ||
+          game.half_moves >= 100
+        ) {
+          // Game is over, do not send the move to the server
+          return;
+        }
+
+        // Send the move to the server
+        sendMoveToServer(move);
       }
 
       function onMouseoverSquare(square, piece) {
@@ -273,7 +286,7 @@
             if (move) {
               game.move(move, { sloppy: true });
               board1.position(game.fen());
-              updateStatus(); 
+              updateStatus();
             }
           },
         });

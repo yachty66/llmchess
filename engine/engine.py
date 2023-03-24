@@ -31,6 +31,7 @@ class ChessEngine:
             }
         ]
         self.model = ""
+        self.game_over = False
 
     def set_api_key(self, api_key):
         openai.api_key = api_key
@@ -40,9 +41,13 @@ class ChessEngine:
         self.model = model
 
     def is_legal_move(self, move):
+        #check here if game is over and in this case send log to the frontend.
         try:
             self.board.push_san(move)
             self.socketio.emit('log_message', f"LLM responded with \"{move}\"")
+            if self.board.is_game_over():
+                self.socketio.emit('log_message', 'Game over')
+                self.game_over = False
             return True
         except ValueError:
             self.socketio.emit('log_message', f"LLM responded with illegal move \"{move}\". Repeat request.")
@@ -50,8 +55,8 @@ class ChessEngine:
         
     #white makes 
     def process_move(self, move_from, move_to, promotion):
-        #i need to check if the game is over
-        #can check that in legal move check
+        if self.game_over:
+            return 
         self.move_count += 1
         if self.move_count == 2:
             # TODO make dynamically

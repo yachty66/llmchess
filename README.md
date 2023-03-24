@@ -27,8 +27,10 @@ can i use lichess as an wrapper somehow? fuck that i will do it from scratch wit
 - [x] on click of start insert api key from input field and also model
     - [x] fix bug of that key gets not inserted correctly 
     - [x] if that works turn start to stop and it should be possible to start the game
-- [ ] add field for logs
-- [ ] add model responses in respective colors
+- [x] add field for logs
+- [x] add model responses in respective colors
+- [ ] display waiting in log 
+- [ ] make content not overflowing
 - [ ] on game end display respective butttons 
 
 - [ ] add analytics to site  

@@ -33,7 +33,6 @@ class ChessEngine:
 
     def set_api_key(self, api_key):
         openai.api_key = api_key
-        print(openai.api_key)
 
     def is_legal_move(self, move):
         try:
@@ -83,7 +82,6 @@ class ChessEngine:
     def get_gpt_response(self, messages):
         url = "https://api.openai.com/v1/chat/completions"
         print("messages", messages)
-
         completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo-0301",
         messages=messages

@@ -1,6 +1,4 @@
 import openai
-from flask_socketio import SocketIO, emit
-#import socketio
 import time
 import threading
 import chess
@@ -10,8 +8,7 @@ import json
 import requests
 
 class ChessEngine:
-    def __init__(self, socketio, api_key=None, model=None):
-        self.socketio = socketio
+    def __init__(self, api_key=None, model=None):
         self.move_count = 1
         self.board = chess.Board()
         self.messages = [
@@ -41,13 +38,13 @@ class ChessEngine:
         #check here if game is over and in this case send log to the frontend.
         try:
             self.board.push_san(move)
-            self.socketio.emit('log_message', f"LLM responded with \"{move}\"")
+            #self.socketio.emit('log_message', f"LLM responded with \"{move}\"")
             if self.board.is_game_over():
-                self.socketio.emit('log_message', 'Game over')
+                #self.socketio.emit('log_message', 'Game over')
                 self.game_over = False
             return True
         except ValueError:
-            self.socketio.emit('log_message', f"LLM responded with illegal move \"{move}\". Repeat request.")
+            #self.socketio.emit('log_message', f"LLM responded with illegal move \"{move}\". Repeat request.")
             return False
         
     #white makes 

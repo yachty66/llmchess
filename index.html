@@ -29,9 +29,7 @@
     </div>
     <div class="game-container" style="display: flex">
       <div id="spinner" style="display: none">
-        <img
-          alt="Loading..."
-        />
+        <img alt="Loading..." />
       </div>
 
       <div id="board1" style="width: 400px; margin-right: 50px"></div>
@@ -51,8 +49,7 @@
         Waiting for the LLM to respond...
       </div>
     </div>
-    <div></div>
-    <script src="https://cdn.socket.io/4.1.2/socket.io.min.js"></script>
+    <div>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</div>
     <script>
       function createNewSession() {
         return new Promise((resolve, reject) => {
@@ -96,52 +93,62 @@
           if (apiKey.trim() === "") {
             alert("Please enter a valid API key to start the game.");
           } else {
+            console.log("Checking the API key...");
             // Check if the API key is valid
-            $.ajax({
-              url: "/check-api-key",
-              method: "POST",
-              data: {
-                api_key: apiKey,
-              },
-              success: function (response) {
-                if (response.status === "success") {
-                  // Send the API key to the server
-                  $.ajax({
-                    url: "/set-api-key",
+            try {
+              const response = await fetch("/check-api-key", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `api_key=${apiKey}`,
+              });
+              const data = await response.json();
+              console.log(data.status);
+              if (data.status === "success") {
+                console.log("API key is valid");
+
+                // Send the API key to the server
+                try {
+                  const setApiKeyResponse = await fetch("/set-api-key", {
                     method: "POST",
-                    data: {
-                      api_key: apiKey,
-                      model: selectedModel,
+                    headers: {
+                      "Content-Type": "application/x-www-form-urlencoded",
                     },
-                    success: async function (response) {
-                      if (response.status === "success") {
-                        gameStarted = true;
-                        console.log("Game started");
-
-                        // Change the start button to end button
-                        var startButton =
-                          document.getElementById("start-button");
-                        startButton.textContent = "End";
-
-                        // Create new session
-                        try {
-                          const sessionId = await createNewSession();
-                          console.log("New session created:", sessionId);
-                        } catch (error) {
-                          console.error("Error creating new session:", error);
-                        }
-                      } else {
-                        console.log("Error setting the API key");
-                      }
-                    },
+                    body: `api_key=${apiKey}&model=${selectedModel}`,
                   });
-                } else {
-                  alert(
-                    "The provided API key is not valid. Please enter a valid API key."
-                  );
+                  const setApiKeyData = await setApiKeyResponse.json();
+                  console.log("hello");
+                  console.log(setApiKeyData.status);
+                  if (setApiKeyData.status === "success") {
+                    gameStarted = true;
+                    console.log("Game started");
+
+                    // Change the start button to end button
+                    var startButton = document.getElementById("start-button");
+                    startButton.textContent = "End";
+
+                    // Create new session
+                    try {
+                      const sessionId = await createNewSession();
+                      console.log("New session created:", sessionId);
+                    } catch (error) {
+                      console.error("Error creating new session:", error);
+                    }
+                  } else {
+                    console.log("Error setting the API key");
+                  }
+                } catch (error) {
+                  console.error("Error during the AJAX request:", error);
                 }
-              },
-            });
+              } else {
+                alert(
+                  "The provided API key is not valid. Please enter a valid API key."
+                );
+              }
+            } catch (error) {
+              console.error("Error during the AJAX request:", error);
+            }
           }
         });
 
@@ -314,32 +321,6 @@
             }
           },
         });
-      }
-
-
-      var socket = io.connect(
-        "http://" + document.domain + ":" + location.port
-      );
-
-      
-
-      socket.on("log_message", function (msg) {
-        console.log("Received message:", msg);
-        displayLogMessage(msg);
-      });
-
-      function displayLogMessage(message) {
-        const logContainer = document.getElementById("log");
-        const logEntry = document.createElement("div");
-
-        if (message.startsWith("LLM responded with illegal move")) {
-          logEntry.style.color = "red";
-        } else if (message.startsWith("LLM responded with")) {
-          logEntry.style.color = "green";
-        }
-
-        logEntry.textContent = message;
-        logContainer.appendChild(logEntry);
       }
     </script>
   </body>

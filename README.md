@@ -39,8 +39,8 @@ can i use lichess as an wrapper somehow? fuck that i will do it from scratch wit
 - [x] play a game and see how it goes 
 - [x] make on click of end button working - to reset all values if this button was clicked (test that in production setting)
 - [x] remove all logs
-- [ ] make logging appropriate
-- [ ] add rules
+- [x] make logging appropriate
+- [x] add rules
 - [ ] final test online 
 - [ ] check how analytics work 
 - [ ] add link to my twitter

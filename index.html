@@ -22,10 +22,6 @@
         <option value="gpt-4-32k-0314">gpt-4-32k-0314</option>
       </select>
       <button id="start-button">Start</button>
-      <div>
-        (make sure you choose a model which is working with your api key
-        otherwise its not working)
-      </div>
     </div>
     <div class="game-container" style="display: flex">
       <div id="spinner" style="display: none">
@@ -44,7 +40,6 @@
           word-wrap: break-word;
         "
       ></div>
-
       <div id="waiting-message" style="display: none">
         Waiting for the LLM to respond...
       </div>
@@ -52,17 +47,30 @@
     <div id="instructions">
       <p>Read:</p>
       <ol>
-        <li>In order for it to operate, just select the model to which you have access using your API key.</li>
+        <li>
+          In order for it to operate, just select the model to which you have
+          access using your API key.
+        </li>
         <li>You use white to play.</li>
         <li>The game will begin if the "Start" button changes to "End."</li>
-        <li>Reload your browser or use the "End" button to restart the game.</li>
+        <li>
+          Reload your browser or use the "End" button to restart the game.
+        </li>
         <li>In the right-hand pane with a black border, logs appear.</li>
         <li>Only optimized for browser.</li>
-        <li>In my experience, the only way to play a respectable game is with GPT-4. The system still needs improvement and is looking for contributors. Discover how it functions and how to participate here <a href="https://www.example.com/post">[post]</a>.</li>
-        <li>Created by Max Hager (<a href="https://twitter.com/MaxHager66">twitter.com/MaxHager66</a>)</li>
+        <li>
+          In my experience, the only way to play a respectable game is with
+          GPT-4. The system still needs improvement and is looking for
+          contributors. Discover how it functions and how to participate here
+          <a href="https://www.example.com/post">[post]</a>.
+        </li>
+        <li>
+          Created by Max Hager (<a href="https://twitter.com/MaxHager66"
+            >twitter.com/MaxHager66</a
+          >)
+        </li>
       </ol>
     </div>
-    <div></div>
     <script>
       function displayLogMessage(message) {
         var log = document.getElementById("log");
@@ -339,8 +347,7 @@
           if (data.status === "success") {
           } else {
           }
-        } catch (error) {
-        }
+        } catch (error) {}
       }
 
       async function getLogs() {

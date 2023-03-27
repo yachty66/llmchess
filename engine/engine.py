@@ -8,6 +8,7 @@ import io
 import json
 import requests
 
+
 class ChessEngine:
     def __init__(self, api_key=None, model=None, session_id=None):
         self.move_count = 1
@@ -25,7 +26,7 @@ class ChessEngine:
                 ),
             }
         ]
-        self.logs = []  
+        self.logs = []
         self.game_over = False
         self.api_key = api_key
         self.model = model
@@ -41,26 +42,28 @@ class ChessEngine:
         try:
             self.board.push_san(move)
             log_message = f'LLM responded with "{move}"'
-            self.logs.append(log_message) 
+            self.logs.append(log_message)
             if self.board.is_game_over():
                 log_message = "Game over"
-                self.logs.append(log_message) 
+                self.logs.append(log_message)
                 self.game_over = False
             return True
         except ValueError:
             log_message = f'LLM responded with illegal move "{move}". Repeat request.'
             self.logs.append(log_message)
             return False
-        
+
     def update_first_move_message(self, first_move):
-        self.messages[0]["content"] = self.messages[0]["content"].format(first_move=first_move)
+        self.messages[0]["content"] = self.messages[0]["content"].format(
+            first_move=first_move
+        )
 
     def get_next_log(self):
         if len(self.logs) > 0:
             return self.logs.pop(0)
         else:
             return None
-        
+
     def process_move(self, move_from, move_to, promotion):
         if self.game_over:
             return
@@ -71,13 +74,24 @@ class ChessEngine:
             self.board.push_san(san_move)
             self.update_first_move_message(san_move)
             response = self.get_gpt_response(self.messages)
-            move = response.split("Best move:")[-1].strip().split()[0]
+            while True:
+                try:
+                    move = response.split("Best move:")[-1].strip().split()[0]
+                    break
+                except:
+                    continue
             while True:
                 if self.is_legal_move(move):
                     self.messages.append({"role": "assistant", "content": response})
                     break
                 else:
                     response = self.get_gpt_response(self.messages)
+                    while True:
+                        try:
+                            move = response.split("Best move:")[-1].strip().split()[0]
+                            break
+                        except:
+                            continue
                     move = response.split("Best move:")[-1].strip().split()[0]
             return self.board.uci(chess.Move.from_uci(self.board.move_stack[1].uci()))
         san_move = self.board.san(chess.Move.from_uci(move_from + move_to))
@@ -85,7 +99,12 @@ class ChessEngine:
         self.board.push_san(san_move)
         while True:
             response = self.get_gpt_response(self.messages)
-            move = response.split("Best move:")[-1].strip().split()[0]
+            while True:
+                try:
+                    move = response.split("Best move:")[-1].strip().split()[0]
+                    break
+                except:
+                    continue
             if self.is_legal_move(move):
                 self.messages.append({"role": "assistant", "content": response})
                 uci_move = self.board.peek().uci()

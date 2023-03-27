@@ -73,6 +73,9 @@
               reject(error);
             },
           });
+        }).then(() => {
+          // Call getLogs after the session has been created
+          getLogs();
         });
       }
 
@@ -100,7 +103,6 @@
           if (apiKey.trim() === "") {
             alert("Please enter a valid API key to start the game.");
           } else {
-            console.log("Checking the API key...");
             // Check if the API key is valid
             try {
               const response = await fetch("/check-api-key", {
@@ -111,11 +113,7 @@
                 body: `api_key=${apiKey}`,
               });
               const data = await response.json();
-              console.log(data.status);
               if (data.status === "success") {
-                console.log("API key is valid");
-
-                // Send the API key to the server
                 try {
                   const setApiKeyResponse = await fetch("/set-api-key", {
                     method: "POST",
@@ -125,25 +123,16 @@
                     body: `api_key=${apiKey}&model=${selectedModel}`,
                   });
                   const setApiKeyData = await setApiKeyResponse.json();
-                  console.log("hello");
-                  console.log(setApiKeyData.status);
                   if (setApiKeyData.status === "success") {
                     gameStarted = true;
-                    console.log("Game started");
-
-                    // Change the start button to end button
                     var startButton = document.getElementById("start-button");
                     startButton.textContent = "End";
-
-                    // Create new session
                     try {
                       const sessionId = await createNewSession();
-                      console.log("New session created:", sessionId);
                     } catch (error) {
                       console.error("Error creating new session:", error);
                     }
                   } else {
-                    console.log("Error setting the API key");
                   }
                 } catch (error) {
                   console.error("Error during the AJAX request:", error);
@@ -310,7 +299,6 @@
             promotion: move.promotion,
           },
           success: function (response) {
-            console.log(response);
             // Hide the waiting message
             document.getElementById("waiting-message").style.display = "none";
 
@@ -336,12 +324,9 @@
           const response = await fetch("/delete-session");
           const data = await response.json();
           if (data.status === "success") {
-            console.log("Session deleted");
           } else {
-            console.log("Error deleting session");
           }
         } catch (error) {
-          console.log("Error: ", error);
         }
       }
 
@@ -349,7 +334,6 @@
         try {
           const response = await fetch("/get_logs");
           const data = await response.json();
-          console.log(data);
           if (data.log) {
             // Create a new div for the log entry
             const logEntry = document.createElement("div");
@@ -380,7 +364,6 @@
 
       // Call deleteSession when the page is reloaded
       window.addEventListener("load", deleteSession);
-      startRealTimeLogs();
     </script>
   </body>
 </html>

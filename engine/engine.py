@@ -56,8 +56,6 @@ class ChessEngine:
         self.messages[0]["content"] = self.messages[0]["content"].format(first_move=first_move)
 
     def get_next_log(self):
-        print("method called")
-        print(self.logs)
         if len(self.logs) > 0:
             return self.logs.pop(0)
         else:

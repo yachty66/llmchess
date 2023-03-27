@@ -13,7 +13,6 @@ CORS(app)
 
 engine_instances = {}
 
-
 @app.route("/new-session")
 def new_session():
     session_id = str(uuid.uuid4())
@@ -22,7 +21,6 @@ def new_session():
     model = session.get("model")
     engine_instances[session_id] = ChessEngine(api_key, model, session_id)
     return {"session_id": session_id}
-
 
 @app.route("/delete-session")
 def delete_session():
@@ -38,17 +36,19 @@ def delete_session():
 
 @app.route("/get_logs", methods=["GET"])
 def get_logs():
+    #only run this method if new session is created
     session_id = session.get("session_id")
-    if not session_id or session_id not in engine_instances:
-        return {"error": "Invalid session"}
-    engine_instance = engine_instances[session_id]
-    while True:  # Add this line
-        log = engine_instance.get_next_log()  # Implement this method
-        if log:
-            return {"log": log}
-        else:
-            time.sleep(0.5)  # Sleep for 500 milliseconds and try again
-
+    if session_id and session_id in engine_instances:
+        engine_instance = engine_instances[session_id]
+        while True:  # Add this line
+            log = engine_instance.get_next_log()  # Implement this method
+            if log:
+                return {"log": log}
+            else:
+                time.sleep(0.5)  # Sleep for 500 milliseconds and try again
+    else:
+        return {"error": "Session not started"}
+    
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -65,7 +65,6 @@ def move():
     result = engine_instance.process_move(move_from, move_to, promotion)
     return {"move": result}
 
-
 @app.route("/set-api-key", methods=["POST"])
 def set_api_key():
     api_key = request.form.get("api_key")
@@ -73,7 +72,6 @@ def set_api_key():
     session["api_key"] = api_key
     session["model"] = model
     return {"status": "success"}
-
 
 @app.route("/check-api-key", methods=["POST"])
 def check_api_key():
@@ -84,7 +82,6 @@ def check_api_key():
         return {"status": "success"}
     except openai.error.AuthenticationError:
         return {"status": "failure"}
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=81, debug=True)

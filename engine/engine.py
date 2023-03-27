@@ -1,4 +1,5 @@
 import openai
+import os
 import time
 import threading
 import chess
@@ -8,7 +9,7 @@ import json
 import requests
 
 class ChessEngine:
-    def __init__(self, api_key=None, model=None):
+    def __init__(self, api_key=None, model=None, session_id=None):
         self.move_count = 1
         self.board = chess.Board()
         self.messages = [
@@ -16,7 +17,7 @@ class ChessEngine:
                 "role": "system",
                 "content": (
                     "We are playing a chess game. At every turn, repeat all the moves that have already been made."
-                    "Find the best response for Black. I'm White and the game starts with 1.e4\n\n"
+                    "Find the best response for Black. I'm White and the game starts with 1.{first_move}\n\n"
                     "So, to be clear, your output format should always be:\n\n"
                     "PGN of game so far: ...\n\n"
                     "Best move: ...\n\n"
@@ -24,9 +25,11 @@ class ChessEngine:
                 ),
             }
         ]
+        self.logs = []  
         self.game_over = False
         self.api_key = api_key
         self.model = model
+        self.session_id = session_id
 
     def set_api_key(self):
         openai.api_key = self.api_key
@@ -35,26 +38,40 @@ class ChessEngine:
         self.model = self.model
 
     def is_legal_move(self, move):
-        #check here if game is over and in this case send log to the frontend.
         try:
             self.board.push_san(move)
-            #self.socketio.emit('log_message', f"LLM responded with \"{move}\"")
+            log_message = f'LLM responded with "{move}"'
+            self.logs.append(log_message) 
             if self.board.is_game_over():
-                #self.socketio.emit('log_message', 'Game over')
+                log_message = "Game over"
+                self.logs.append(log_message) 
                 self.game_over = False
             return True
         except ValueError:
-            #self.socketio.emit('log_message', f"LLM responded with illegal move \"{move}\". Repeat request.")
+            log_message = f'LLM responded with illegal move "{move}". Repeat request.'
+            self.logs.append(log_message)
             return False
         
-    #white makes 
+    def update_first_move_message(self, first_move):
+        self.messages[0]["content"] = self.messages[0]["content"].format(first_move=first_move)
+
+    def get_next_log(self):
+        print("method called")
+        print(self.logs)
+        if len(self.logs) > 0:
+            return self.logs.pop(0)
+        else:
+            return None
+        
     def process_move(self, move_from, move_to, promotion):
         if self.game_over:
-            return 
+            return
         self.move_count += 1
         if self.move_count == 2:
-            # TODO make dynamically
-            self.board.push_san("e4")
+            uci_move = move_from + move_to
+            san_move = self.board.san(chess.Move.from_uci(uci_move))
+            self.board.push_san(san_move)
+            self.update_first_move_message(san_move)
             response = self.get_gpt_response(self.messages)
             move = response.split("Best move:")[-1].strip().split()[0]
             while True:
@@ -80,9 +97,5 @@ class ChessEngine:
                 continue
 
     def get_gpt_response(self, messages):
-        #url = "https://api.openai.com/v1/chat/completions"
-        completion = openai.ChatCompletion.create(
-        model=self.model,
-        messages=messages
-        )
+        completion = openai.ChatCompletion.create(model=self.model, messages=messages)
         return completion.choices[0].message["content"].strip()

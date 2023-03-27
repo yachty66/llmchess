@@ -39,6 +39,7 @@ can i use lichess as an wrapper somehow? fuck that i will do it from scratch wit
 
 
 - [ ] make on click of end button working - to reset all values if this button was clicked (test that in production setting)
+- [ ] add link to my twitter
 - [ ] add analytics to site  
 
 need to think about the design of the game so that it makes sense. 

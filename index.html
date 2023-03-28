@@ -11,7 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.min.js"></script>
   </head>
   <body>
-    
+    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
     <div id="input-container">
       <input type="text" id="api-key-input" placeholder="OpenAI Key" />
       <select id="model-selector">
@@ -310,13 +310,11 @@
         }
       }
 
+      //i am trying to send a move to my server. i call the sendMoveToServer method inside the sendMoveToServer itself and there the following
+
       function sendMoveToServer(move) {
-        //check if game started 
-
-
         // Show the waiting message
         document.getElementById("waiting-message").style.display = "block";
-
         $.ajax({
           url: "/move",
           method: "POST",
@@ -332,13 +330,15 @@
             // Check if response.bestMove exists
             if (response.move) {
               var move = response.move;
-            } 
-            else {
+            } else{
+              console.log("hello")
+            }
+            /*else {
               //create new session and call move again
               createNewSession();
               sendMoveToServer(move);
               var move = null;
-            }
+            }*/
             if (move) {
               game.move(move, { sloppy: true });
               board1.position(game.fen());
@@ -381,7 +381,6 @@
         } catch (error) {
           console.error("Error fetching logs:", error);
         } finally {
-          // Call getLogs again after 3 seconds
           setTimeout(getLogs, 500);
         }
       }

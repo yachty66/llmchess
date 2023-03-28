@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Chess</title>
+    <title>LLMChess</title>
     <link
       rel="stylesheet"
       href="{{url_for('static', filename='css/chessboard-1.0.0.min.css')}}"
@@ -11,6 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.min.js"></script>
   </head>
   <body>
+    
     <div id="input-container">
       <input type="text" id="api-key-input" placeholder="OpenAI Key" />
       <select id="model-selector">
@@ -57,7 +58,8 @@
           Reload your browser or use the "End" button to restart the game.
         </li>
         <li>In the right-hand pane with a black border, logs appear.</li>
-        <li>Only optimized for browser.</li>
+        <li>If the game does not respond at the beginning, restart the game.</li>
+        <li>Tested in Google Chrome browser.</li>
         <li>
           In my experience, the only way to play a respectable game is with
           GPT-4. The system still needs improvement and is looking for
@@ -84,6 +86,7 @@
             url: "/new-session",
             method: "GET",
             success: function (response) {
+              console.log(response.session_id);
               if (response.session_id) {
                 resolve(response.session_id);
               } else {
@@ -94,9 +97,6 @@
               reject(error);
             },
           });
-        }).then(() => {
-          // Call getLogs after the session has been created
-          getLogs();
         });
       }
 
@@ -124,7 +124,6 @@
           if (apiKey.trim() === "") {
             alert("Please enter a valid API key to start the game.");
           } else {
-            // Check if the API key is valid
             try {
               const response = await fetch("/check-api-key", {
                 method: "POST",
@@ -135,28 +134,33 @@
               });
               const data = await response.json();
               if (data.status === "success") {
-                try {
-                  const setApiKeyResponse = await fetch("/set-api-key", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/x-www-form-urlencoded",
-                    },
-                    body: `api_key=${apiKey}&model=${selectedModel}`,
-                  });
-                  const setApiKeyData = await setApiKeyResponse.json();
-                  if (setApiKeyData.status === "success") {
-                    gameStarted = true;
-                    var startButton = document.getElementById("start-button");
-                    startButton.textContent = "End";
-                    try {
-                      const sessionId = await createNewSession();
-                    } catch (error) {
-                      console.error("Error creating new session:", error);
+                const setApiKeyResponse = await fetch("/set-api-key", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                  },
+                  body: `api_key=${apiKey}&model=${selectedModel}`,
+                });
+                const setApiKeyData = await setApiKeyResponse.json();
+                if (setApiKeyData.status === "success") {
+                  try {
+                    const sessionId = await createNewSession();
+                    console.log("Session ID:", sessionId);
+                    if (sessionId) {
+                      gameStarted = true;
+                      var startButton = document.getElementById("start-button");
+                      startButton.textContent = "End";
+                      getLogs();
+                    } else {
+                      alert(
+                        "Failed to create a new session. Please try again."
+                      );
                     }
-                  } else {
+                  } catch (error) {
+                    console.error("Error creating new session:", error);
                   }
-                } catch (error) {
-                  console.error("Error during the AJAX request:", error);
+                } else {
+                  alert("Failed to set the API key. Please try again.");
                 }
               } else {
                 alert(
@@ -250,7 +254,6 @@
           return;
         }
 
-        // Send the move to the server
         sendMoveToServer(move);
       }
 
@@ -308,6 +311,9 @@
       }
 
       function sendMoveToServer(move) {
+        //check if game started 
+
+
         // Show the waiting message
         document.getElementById("waiting-message").style.display = "block";
 
@@ -322,13 +328,16 @@
           success: function (response) {
             // Hide the waiting message
             document.getElementById("waiting-message").style.display = "none";
-
+            console.log(response);
             // Check if response.bestMove exists
             if (response.move) {
               var move = response.move;
-            } else {
-              // Fallback to parsing the string if response.bestMove is not available
-              var move = response.split("move:")[1]?.trim().split(" ")[0];
+            } 
+            else {
+              //create new session and call move again
+              createNewSession();
+              sendMoveToServer(move);
+              var move = null;
             }
             if (move) {
               game.move(move, { sloppy: true });

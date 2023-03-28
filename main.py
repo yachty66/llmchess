@@ -20,6 +20,7 @@ def new_session():
     api_key = session.get("api_key")
     model = session.get("model")
     engine_instances[session_id] = ChessEngine(api_key, model, session_id)
+    print("engine instances printed from new session: ", engine_instances)
     return {"session_id": session_id}
 
 @app.route("/delete-session")
@@ -56,7 +57,10 @@ def index():
 @app.route("/move", methods=["POST"])
 def move():
     session_id = session.get("session_id")
-    if not session_id or session_id not in engine_instances:
+    print("session id which should be in the session is: ", session_id)
+    #so i have a session id but session is not in the list of all sessions
+    print("engine instances all sessions: ", engine_instances)
+    if session_id not in engine_instances:
         return {"error": "Invalid session"}
     engine_instance = engine_instances[session_id]
     move_from = request.form.get("from")

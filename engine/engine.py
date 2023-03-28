@@ -22,7 +22,7 @@ class ChessEngine:
                     "So, to be clear, your output format should always be:\n\n"
                     "PGN of game so far: ...\n\n"
                     "Best move: ...\n\n"
-                    "and then I get to play my move. Do not include the move number'."
+                    "and then I get to play my move. Do not include the move number."
                 ),
             }
         ]
@@ -74,24 +74,13 @@ class ChessEngine:
             self.board.push_san(san_move)
             self.update_first_move_message(san_move)
             response = self.get_gpt_response(self.messages)
-            while True:
-                try:
-                    move = response.split("Best move:")[-1].strip().split()[0]
-                    break
-                except:
-                    continue
+            move = response.split("Best move:")[-1].strip().split()[0]
             while True:
                 if self.is_legal_move(move):
                     self.messages.append({"role": "assistant", "content": response})
                     break
                 else:
                     response = self.get_gpt_response(self.messages)
-                    while True:
-                        try:
-                            move = response.split("Best move:")[-1].strip().split()[0]
-                            break
-                        except:
-                            continue
                     move = response.split("Best move:")[-1].strip().split()[0]
             return self.board.uci(chess.Move.from_uci(self.board.move_stack[1].uci()))
         san_move = self.board.san(chess.Move.from_uci(move_from + move_to))
@@ -99,12 +88,7 @@ class ChessEngine:
         self.board.push_san(san_move)
         while True:
             response = self.get_gpt_response(self.messages)
-            while True:
-                try:
-                    move = response.split("Best move:")[-1].strip().split()[0]
-                    break
-                except:
-                    continue
+            move = response.split("Best move:")[-1].strip().split()[0]
             if self.is_legal_move(move):
                 self.messages.append({"role": "assistant", "content": response})
                 uci_move = self.board.peek().uci()

@@ -99,7 +99,6 @@
             url: "/new-session",
             method: "GET",
             success: function (response) {
-              console.log(response.session_id);
               if (response.session_id) {
                 resolve(response.session_id);
               } else {
@@ -158,7 +157,6 @@
                 if (setApiKeyData.status === "success") {
                   try {
                     const sessionId = await createNewSession();
-                    console.log("Session ID:", sessionId);
                     if (sessionId) {
                       gameStarted = true;
                       var startButton = document.getElementById("start-button");
@@ -325,7 +323,6 @@
 
       function sendMoveToServer(move) {
         const sessionId = sessionStorage.getItem("session_id");
-        console.log("Sending session_id from frontend:", sessionId);
         // Show the waiting message
         document.getElementById("waiting-message").style.display = "block";
         $.ajax({
@@ -339,7 +336,6 @@
           success: function (response) {
             // Hide the waiting message
             document.getElementById("waiting-message").style.display = "none";
-            console.log(response);
             // Check if response.bestMove exists
             if (response.move) {
               var move = response.move;

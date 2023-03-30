@@ -11,6 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.min.js"></script>
   </head>
   <body>
+    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
     <div id="input-container">
       <input type="text" id="api-key-input" placeholder="OpenAI Key" />
       <select id="model-selector">
@@ -72,101 +73,12 @@
       </ol>
     </div>
     <script>
-      function displayLogMessage(message) {
-        var log = document.getElementById("log");
-        log.innerHTML += message + "\n";
-        log.scrollTop = log.scrollHeight; // Automatically scroll to the bottom
-      }
-
-      function createNewSession() {
-        return new Promise((resolve, reject) => {
-          $.ajax({
-            url: "/new-session",
-            method: "GET",
-            success: function (response) {
-              if (response.session_id) {
-                resolve(response.session_id);
-              } else {
-                reject("Error creating new session");
-              }
-            },
-            error: function (error) {
-              reject(error);
-            },
-          });
-        }).then(() => {
-          // Call getLogs after the session has been created
-          getLogs();
-        });
-      }
-
       var gameStarted = false;
       var selectedModel = document.getElementById("model-selector").value;
       document
         .getElementById("model-selector")
         .addEventListener("change", function () {
           selectedModel = this.value;
-        });
-
-      document
-        .getElementById("start-button")
-        .addEventListener("click", async function () {
-          // Check if the game is already started
-          if (gameStarted) {
-            location.reload();
-            return;
-          }
-
-          // Get the API key from the input field
-          var apiKey = document.getElementById("api-key-input").value;
-
-          // Check if the input field is empty
-          if (apiKey.trim() === "") {
-            alert("Please enter a valid API key to start the game.");
-          } else {
-            // Check if the API key is valid
-            try {
-              const response = await fetch("/check-api-key", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: `api_key=${apiKey}`,
-              });
-              const data = await response.json();
-              if (data.status === "success") {
-                try {
-                  const setApiKeyResponse = await fetch("/set-api-key", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/x-www-form-urlencoded",
-                    },
-                    body: `api_key=${apiKey}&model=${selectedModel}`,
-                  });
-                  const setApiKeyData = await setApiKeyResponse.json();
-                  if (setApiKeyData.status === "success") {
-                    gameStarted = true;
-                    var startButton = document.getElementById("start-button");
-                    startButton.textContent = "End";
-                    try {
-                      const sessionId = await createNewSession();
-                    } catch (error) {
-                      console.error("Error creating new session:", error);
-                    }
-                  } else {
-                  }
-                } catch (error) {
-                  console.error("Error during the AJAX request:", error);
-                }
-              } else {
-                alert(
-                  "The provided API key is not valid. Please enter a valid API key."
-                );
-              }
-            } catch (error) {
-              console.error("Error during the AJAX request:", error);
-            }
-          }
         });
 
       function updatePositionWithLoad(chess, source, target, piece) {
@@ -250,8 +162,8 @@
           return;
         }
 
-        // Send the move to the server
-        sendMoveToServer(move);
+        //TODO Send the move to the server
+        //sendMoveToServer(move);
       }
 
       function onMouseoverSquare(square, piece) {
@@ -307,83 +219,66 @@
         }
       }
 
-      function sendMoveToServer(move) {
-        // Show the waiting message
-        document.getElementById("waiting-message").style.display = "block";
+      //function for starting the game
+      function startGame() {
+        var apiKey = document.getElementById("api-key-input").value;
+        var model = selectedModel;
+        if (!apiKey) {
+          alert("Please enter your OpenAI API key");
+          return;
+        }
 
-        $.ajax({
-          url: "/move",
-          method: "POST",
-          data: {
-            from: move.from,
-            to: move.to,
-            promotion: move.promotion,
-          },
-          success: function (response) {
-            // Hide the waiting message
-            document.getElementById("waiting-message").style.display = "none";
-
-            // Check if response.bestMove exists
-            if (response.move) {
-              var move = response.move;
+        // Set API key and model in the Flask session
+        $.post(
+          "/set-api-key",
+          { api_key: apiKey, model: model },
+          function (response) {
+            if (response.status === "success") {
+              // Start a new session and begin the game
+              $.getJSON("/new-session", function (response) {
+                if (response.session_id) {
+                  gameStarted = true;
+                  document.getElementById("start-button").innerHTML = "End";
+                } else {
+                  alert("Failed to start the game");
+                }
+              });
             } else {
-              // Fallback to parsing the string if response.bestMove is not available
-              var move = response.split("move:")[1]?.trim().split(" ")[0];
+              alert("Failed to set the API key and model");
             }
-            if (move) {
-              game.move(move, { sloppy: true });
-              board1.position(game.fen());
-              updateStatus();
-            }
-          },
+          }
+        );
+      }
+
+      //event listener for start and end button
+      document
+        .getElementById("start-button")
+        .addEventListener("click", function () {
+          if (gameStarted) {
+            endGame();
+          } else {
+            startGame();
+          }
+        });
+
+      //end a game
+      function endGame() {
+        $.getJSON("/delete-session", function (response) {
+          if (response.status === "success") {
+            location.reload();
+          } else {
+            alert("Failed to delete the session");
+          }
         });
       }
 
-      // Function to delete the session
-      async function deleteSession() {
-        try {
-          const response = await fetch("/delete-session");
-          const data = await response.json();
-          if (data.status === "success") {
-          } else {
-          }
-        } catch (error) {}
-      }
-
-      async function getLogs() {
-        try {
-          const response = await fetch("/get_logs");
-          const data = await response.json();
-          if (data.log) {
-            // Create a new div for the log entry
-            const logEntry = document.createElement("div");
-
-            // Check if the log is an error or success, and set the color accordingly
-            if (data.log.includes("illegal")) {
-              logEntry.style.color = "red";
-            } else {
-              logEntry.style.color = "green";
-            }
-            // Set the log entry text
-            logEntry.innerHTML = data.log;
-            // Append the log entry to the log container
-            document.getElementById("log").appendChild(logEntry);
-          }
-        } catch (error) {
-          console.error("Error fetching logs:", error);
-        } finally {
-          // Call getLogs again after 3 seconds
-          setTimeout(getLogs, 500);
+      // Add this event listener to delete the session when the window is reloaded or closed
+      window.addEventListener("beforeunload", function (event) {
+        if (gameStarted) {
+          // Asynchronous request to delete the session
+          navigator.sendBeacon("/delete-session");
         }
-      }
-      // Add this function in your script tag
-      function startRealTimeLogs() {
-        getLogs();
-        setTimeout(startRealTimeLogs, 1000);
-      }
-
-      // Call deleteSession when the page is reloaded
-      window.addEventListener("load", deleteSession);
+      });
     </script>
   </body>
 </html>

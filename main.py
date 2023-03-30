@@ -20,6 +20,7 @@ def new_session():
     api_key = session.get("api_key")
     model = session.get("model")
     engine_instances[session_id] = ChessEngine(api_key, model, session_id)
+    print(engine_instances)
     return {"session_id": session_id}
 
 @app.route("/delete-session")

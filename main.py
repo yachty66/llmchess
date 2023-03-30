@@ -55,7 +55,6 @@ def index():
 
 @app.route("/move", methods=["POST"])
 def move():
-    print("engine instances", engine_instances)
     session_id = session.get("session_id")
     if session_id not in engine_instances:
         return {"error": "Invalid session"}

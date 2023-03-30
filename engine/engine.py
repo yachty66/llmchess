@@ -82,9 +82,7 @@ class ChessEngine:
             san_move = self.board.san(chess.Move.from_uci(uci_move))
             self.board.push_san(san_move)
             self.update_first_move_message(san_move)
-            print("messages", self.messages)
             response = self.get_gpt_response(self.messages)
-            print("response", response)
             move = self.extract_move(response)
             while True:
                 if self.is_legal_move(move):
@@ -98,7 +96,6 @@ class ChessEngine:
         self.messages.append({"role": "user", "content": f"{san_move}"})
         self.board.push_san(san_move)
         while True:
-            print("message", self.messages)
             response = self.get_gpt_response(self.messages)
             move = self.extract_move(response)
             if self.is_legal_move(move):

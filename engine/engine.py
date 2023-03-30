@@ -6,6 +6,7 @@ import chess
 import chess.pgn
 import io
 import json
+import re
 import requests
 
 
@@ -37,6 +38,14 @@ class ChessEngine:
 
     def set_model(self):
         self.model = self.model
+
+    def extract_move(self, response):
+        move_pattern = re.compile(r'Best move:.*?\b(?:\d+\.\.\.)?([a-h][1-8][QNRB]?|O-O(?:-O)?)\b')
+        match = move_pattern.search(response)
+        if match:
+            return match.group(1)
+        else:
+            return None
 
     def is_legal_move(self, move):
         try:
@@ -73,22 +82,25 @@ class ChessEngine:
             san_move = self.board.san(chess.Move.from_uci(uci_move))
             self.board.push_san(san_move)
             self.update_first_move_message(san_move)
+            print("messages", self.messages)
             response = self.get_gpt_response(self.messages)
-            move = response.split("Best move:")[-1].strip().split()[0]
+            print("response", response)
+            move = self.extract_move(response)
             while True:
                 if self.is_legal_move(move):
                     self.messages.append({"role": "assistant", "content": response})
                     break
                 else:
                     response = self.get_gpt_response(self.messages)
-                    move = response.split("Best move:")[-1].strip().split()[0]
+                    move = self.extract_move(response)
             return self.board.uci(chess.Move.from_uci(self.board.move_stack[1].uci()))
         san_move = self.board.san(chess.Move.from_uci(move_from + move_to))
         self.messages.append({"role": "user", "content": f"{san_move}"})
         self.board.push_san(san_move)
         while True:
+            print("message", self.messages)
             response = self.get_gpt_response(self.messages)
-            move = response.split("Best move:")[-1].strip().split()[0]
+            move = self.extract_move(response)
             if self.is_legal_move(move):
                 self.messages.append({"role": "assistant", "content": response})
                 uci_move = self.board.peek().uci()

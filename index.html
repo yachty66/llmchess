@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-Y5SL7C9VE8"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-Y5SL7C9VE8");
+    </script>
     <title>LLMChess</title>
     <link
       rel="stylesheet"
@@ -11,7 +25,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.min.js"></script>
   </head>
   <body>
-    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
     <div id="input-container">
       <input type="text" id="api-key-input" placeholder="OpenAI Key" />
       <select id="model-selector">
@@ -58,18 +71,18 @@
           Reload your browser or use the "End" button to restart the game.
         </li>
         <li>In the right-hand pane with a black border, logs appear.</li>
-        <li>If the game does not respond at the beginning, restart the game.</li>
+        <li>
+          If the game does not respond at the beginning, restart the game.
+        </li>
         <li>Tested in Google Chrome browser.</li>
         <li>
           In my experience, the only way to play a respectable game is with
           GPT-4. The system still needs improvement and is looking for
-          contributors. Discover how it functions and how to participate here
-          <a href="https://www.example.com/post">[post]</a>.
+          contributors. Discover how it functions and how to participate
+          <a href="https://maxhager.xyz/LLMChess">here</a>.
         </li>
         <li>
-          Created by Max Hager (<a href="https://twitter.com/MaxHager66"
-            >twitter.com/MaxHager66</a
-          >)
+          Created by <a href="https://twitter.com/MaxHager66">Max Hager</a>
         </li>
       </ol>
     </div>
@@ -113,7 +126,9 @@
         .addEventListener("click", async function () {
           // Check if the game is already started
           if (gameStarted) {
-            location.reload();
+            console.log("shouldt delete");
+            deleteSession();
+            //location.reload();
             return;
           }
 
@@ -310,9 +325,11 @@
         }
       }
 
-      //i am trying to send a move to my server. i call the sendMoveToServer method inside the sendMoveToServer itself and there the following
+      //i am trying to send a move to my server. i call the sendMoveToServer method inside the sendMoveToServer itself if a move is not available, i.e. a invalid session appears. how can i
 
       function sendMoveToServer(move) {
+        const sessionId = sessionStorage.getItem("session_id");
+        console.log("Sending session_id from frontend:", sessionId);
         // Show the waiting message
         document.getElementById("waiting-message").style.display = "block";
         $.ajax({
@@ -330,8 +347,8 @@
             // Check if response.bestMove exists
             if (response.move) {
               var move = response.move;
-            } else{
-              console.log("hello")
+            } else {
+              console.log("hello");
             }
             /*else {
               //create new session and call move again
@@ -390,8 +407,7 @@
         setTimeout(startRealTimeLogs, 1000);
       }
 
-      // Call deleteSession when the page is reloaded
-      window.addEventListener("load", deleteSession);
+      //window.addEventListener("load", deleteSession);
     </script>
   </body>
 </html>

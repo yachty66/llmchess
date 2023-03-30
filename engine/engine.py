@@ -1,14 +1,7 @@
 import openai
-import os
-import time
-import threading
 import chess
 import chess.pgn
-import io
-import json
 import re
-import requests
-
 
 class ChessEngine:
     def __init__(self, api_key=None, model=None, session_id=None):

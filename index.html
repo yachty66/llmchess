@@ -126,9 +126,7 @@
         .addEventListener("click", async function () {
           // Check if the game is already started
           if (gameStarted) {
-            console.log("shouldt delete");
-            deleteSession();
-            //location.reload();
+            location.reload();
             return;
           }
 
@@ -407,7 +405,7 @@
         setTimeout(startRealTimeLogs, 1000);
       }
 
-      //window.addEventListener("load", deleteSession);
+      window.addEventListener("load", deleteSession);
     </script>
   </body>
 </html>

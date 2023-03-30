@@ -323,8 +323,6 @@
         }
       }
 
-      //i am trying to send a move to my server. i call the sendMoveToServer method inside the sendMoveToServer itself if a move is not available, i.e. a invalid session appears. how can i
-
       function sendMoveToServer(move) {
         const sessionId = sessionStorage.getItem("session_id");
         console.log("Sending session_id from frontend:", sessionId);
@@ -346,14 +344,8 @@
             if (response.move) {
               var move = response.move;
             } else {
-              console.log("hello");
+              console.log("something went wrong");
             }
-            /*else {
-              //create new session and call move again
-              createNewSession();
-              sendMoveToServer(move);
-              var move = null;
-            }*/
             if (move) {
               game.move(move, { sloppy: true });
               board1.position(game.fen());
@@ -399,7 +391,6 @@
           setTimeout(getLogs, 500);
         }
       }
-      // Add this function in your script tag
       function startRealTimeLogs() {
         getLogs();
         setTimeout(startRealTimeLogs, 1000);

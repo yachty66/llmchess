@@ -39,13 +39,17 @@ class ChessEngine:
     def set_model(self):
         self.model = self.model
 
-    def extract_move(self, response):
+    def extract_move(response):
         move_pattern = re.compile(r'Best move:.*?\b(?:\d+\.\.\.)?([a-h][1-8][QNRB]?|O-O(?:-O)?)\b')
-        match = move_pattern.search(response)
-        if match:
-            return match.group(1)
-        else:
-            return None
+        try:
+            match = move_pattern.search(response)
+            if match:
+                return match.group(1)
+            else:
+                return "Model response did not contain a move"
+        except Exception as e:
+            print(f"An error occurred while extracting the move: {e}")
+            return "Model response did not contain a move"
 
     def is_legal_move(self, move):
         try:

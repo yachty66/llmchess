@@ -39,7 +39,7 @@ class ChessEngine:
     def set_model(self):
         self.model = self.model
 
-    def extract_move(response):
+    def extract_move(self, response):
         move_pattern = re.compile(r'Best move:.*?\b(?:\d+\.\.\.)?([a-h][1-8][QNRB]?|O-O(?:-O)?)\b')
         try:
             match = move_pattern.search(response)

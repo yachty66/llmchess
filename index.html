@@ -57,17 +57,18 @@
           Reload your browser or use the "End" button to restart the game.
         </li>
         <li>In the right-hand pane with a black border, logs appear.</li>
-        <li>Only optimized for browser.</li>
+        <li>
+          If the game does not respond at the beginning, restart the game.
+        </li>
+        <li>Tested in Google Chrome browser.</li>
         <li>
           In my experience, the only way to play a respectable game is with
           GPT-4. The system still needs improvement and is looking for
-          contributors. Discover how it functions and how to participate here
-          <a href="https://www.example.com/post">[post]</a>.
+          contributors. Discover how it functions and how to participate
+          <a href="https://maxhager.xyz/LLMChess">here</a>.
         </li>
         <li>
-          Created by Max Hager (<a href="https://twitter.com/MaxHager66"
-            >twitter.com/MaxHager66</a
-          >)
+          Created by <a href="https://twitter.com/MaxHager66">Max Hager</a>
         </li>
       </ol>
     </div>
@@ -318,13 +319,17 @@
 
               if (opponentMoveObj === null) {
                 displayLogMessage(
-                  "LLM responded with illegal move: " + opponentMove, "error"
+                  "LLM responded with illegal move: " + opponentMove,
+                  "error"
                 );
                 sendMoveToServer(move, "repeat", sanMove);
                 return;
               }
 
-              displayLogMessage("LLM responded with move: " + opponentMove, "success");
+              displayLogMessage(
+                "LLM responded with move: " + opponentMove,
+                "success"
+              );
 
               game.load(chess.fen());
               board1.position(chess.fen());
@@ -335,7 +340,10 @@
         ).fail(function () {
           // Hide the waiting message
           document.getElementById("waiting-message").style.display = "none";
-          displayLogMessage("Error: Failed to send the move to the server", "error");
+          displayLogMessage(
+            "Error: Failed to send the move to the server",
+            "error"
+          );
         });
       }
 
@@ -366,8 +374,6 @@
         // Scroll to the bottom of the log
         logElement.scrollTop = logElement.scrollHeight;
       }
-
-      //this worked! Now I need to ensure that the move is send to the backend where an request to the backend is made
     </script>
   </body>
 </html>

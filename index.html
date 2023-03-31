@@ -11,7 +11,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.min.js"></script>
   </head>
   <body>
-
     <div id="input-container">
       <input type="text" id="api-key-input" placeholder="OpenAI Key" />
       <select id="model-selector">
@@ -161,7 +160,7 @@
           // Game is over, do not send the move to the server
           return;
         }
-        var sanMove = game.history({ verbose: false }).slice(-1)[0]
+        var sanMove = game.history({ verbose: false }).slice(-1)[0];
         //TODO Send the move to the server
         sendMoveToServer(move, "move", sanMove);
       }
@@ -295,54 +294,77 @@
         var pgnData = game.pgn();
         $.post(
           "/move",
-          { from: move.from, to: move.to, promotion: move.promotion, status: status, pgn: pgnData, san: sanMove },
+          {
+            from: move.from,
+            to: move.to,
+            promotion: move.promotion,
+            status: status,
+            pgn: pgnData,
+            san: sanMove,
+          },
           function (response) {
             // Hide the waiting message
             document.getElementById("waiting-message").style.display = "none";
 
             if (response.error) {
-              displayLogMessage("Error: " + response.error);
+              displayLogMessage("Error: " + response.error, "error");
             } else {
               // Process the response from the server (e.g., update the board)
               var opponentMove = response.move;
-              console.log(opponentMove);
 
-              displayLogMessage("Opponent's move: " + opponentMove);
-
-              // Create a new Chess instance
               const chess = new Chess(game.fen());
 
-              // Try to make the opponent's move
               var opponentMoveObj = chess.move(opponentMove);
 
-              // Check if the opponent's move is legal (not null)
               if (opponentMoveObj === null) {
-                /*displayLogMessage(
-                  "Error: Invalid move received from the server"
-                );*/
-
-                // Resend the move to the server if the move is not legal
+                displayLogMessage(
+                  "LLM responded with illegal move: " + opponentMove, "error"
+                );
                 sendMoveToServer(move, "repeat", sanMove);
                 return;
               }
 
+              displayLogMessage("LLM responded with move: " + opponentMove, "success");
+
               game.load(chess.fen());
               board1.position(chess.fen());
 
-              // Update the game status and display any logs
               updateStatus();
             }
           }
         ).fail(function () {
           // Hide the waiting message
           document.getElementById("waiting-message").style.display = "none";
-          displayLogMessage("Error: Failed to send the move to the server");
+          displayLogMessage("Error: Failed to send the move to the server", "error");
         });
       }
 
-      function displayLogMessage(message) {
+      function displayLogMessage(message, type = "default") {
         var logElement = document.getElementById("log");
-        logElement.innerHTML += message + "<br>";
+
+        // Create a new message element
+        var messageElement = document.createElement("div");
+
+        // Set the color based on the type
+        switch (type) {
+          case "error":
+            messageElement.style.color = "red";
+            break;
+          case "success":
+            messageElement.style.color = "green";
+            break;
+          default:
+            messageElement.style.color = "black";
+        }
+
+        // Set the message text
+        messageElement.textContent = message;
+
+        // Add the message to the log
+        logElement.appendChild(messageElement);
+
+        // Scroll to the bottom of the log
+        logElement.scrollTop = logElement.scrollHeight;
       }
 
       //this worked! Now I need to ensure that the move is send to the backend where an request to the backend is made

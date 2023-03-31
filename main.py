@@ -9,21 +9,12 @@ import uuid
 from datetime import datetime
 from datetime import timedelta
 
-class PermanentSessionLifetimeInterface(SecureCookieSessionInterface):
-    def get_expiration_time(self, app, session):
-        return datetime.utcnow() + app.permanent_session_lifetime
-
 app = Flask(__name__, template_folder=".")
 app.secret_key = "sf43d5f4s394jfe2dm903"
-app.permanent_session_lifetime = timedelta(days=30)
-app.session_interface = PermanentSessionLifetimeInterface()
+app.logger.setLevel(logging.DEBUG)
 CORS(app)
 
 engine_instances = {}
-
-@app.before_request
-def make_session_permanent():
-    session.permanent = True
 
 @app.route("/new-session")
 def new_session():
@@ -32,7 +23,8 @@ def new_session():
     api_key = session.get("api_key")
     model = session.get("model")
     engine_instances[session_id] = ChessEngine(api_key, model, session_id)
-    logging.debug(f"New session created: {session_id}")
+    print(f"New session created: {session_id}, session content: {dict(session)}, engine_instances: {engine_instances}")
+    #print("New session created:", session_id)
     return {"session_id": session_id}
 
 @app.route("/delete-session")
@@ -52,8 +44,10 @@ def index():
 
 @app.route("/move", methods=["POST"])
 def move():
+    print(f"Before move, session content: {dict(session)}, engine_instances: {engine_instances}")
     session_id = session.get("session_id")
     if not session_id or session_id not in engine_instances:
+        print(f"Invalid session in move: {session_id}")
         return {"error": "Invalid session"}
     engine_instance = engine_instances[session_id]
     move_from = request.form.get("from")
@@ -63,6 +57,7 @@ def move():
     pgn_data = request.form.get("pgn")
     san = request.form.get("san")
     result = engine_instance.process_move(move_from, move_to, promotion, status, pgn_data, san)
+    print(f"After move, session content: {dict(session)}, engine_instances: {engine_instances}")
     return {"move": result}
 
 @app.route("/set-api-key", methods=["POST"])
@@ -82,7 +77,6 @@ def check_api_key():
         return {"status": "success"}
     except openai.error.AuthenticationError:
         return {"status": "failure"}
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=81, debug=True)

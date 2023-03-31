@@ -1,7 +1,8 @@
 import openai
 import chess
 import chess.pgn
-import re
+import io
+
 
 class ChessEngine:
     def __init__(self, api_key=None, model=None, session_id=None):
@@ -16,7 +17,7 @@ class ChessEngine:
                     "So, to be clear, your output format should always be:\n\n"
                     "PGN of game so far: ...\n\n"
                     "Best move: ...\n\n"
-                    "and then I get to play my move. Do not include the move number."
+                    "and then I get to play my move. Do not include the move number'."
                 ),
             }
         ]
@@ -33,75 +34,45 @@ class ChessEngine:
         self.model = self.model
 
     def extract_move(self, response):
-        move_pattern = re.compile(r'Best move:.*?\b(?:\d+\.\.\.)?([a-h][1-8][QNRB]?|O-O(?:-O)?)\b')
-        try:
-            match = move_pattern.search(response)
-            if match:
-                return match.group(1)
-            else:
-                return "Model response did not contain a move"
-        except Exception as e:
-            print(f"An error occurred while extracting the move: {e}")
-            return "Model response did not contain a move"
-
-    def is_legal_move(self, move):
-        try:
-            self.board.push_san(move)
-            log_message = f'LLM responded with "{move}"'
-            self.logs.append(log_message)
-            if self.board.is_game_over():
-                log_message = "Game over"
-                self.logs.append(log_message)
-                self.game_over = False
-            return True
-        except ValueError:
-            log_message = f'LLM responded with illegal move "{move}". Repeat request.'
-            self.logs.append(log_message)
-            return False
+        response = response.split("Best move:")[1]
+        response = response.replace("...", "")
+        response = response.replace("1.", "")
+        response = response.replace(".", "")
+        response = response.replace(" ", "")
+        #in case response is wrong shorten
+        response = response[:10]
+        return response
 
     def update_first_move_message(self, first_move):
         self.messages[0]["content"] = self.messages[0]["content"].format(
             first_move=first_move
         )
 
-    def get_next_log(self):
-        if len(self.logs) > 0:
-            return self.logs.pop(0)
-        else:
-            return None
-
-    def process_move(self, move_from, move_to, promotion):
-        if self.game_over:
-            return
+    def process_move(self, move_from, move_to, promotion, status, pgn, san):
+        pgn_game = chess.pgn.read_game(io.StringIO(pgn))
         self.move_count += 1
+        if status == "repeat":
+            self.messages.pop()
+            response = self.get_gpt_response(self.messages)
+            self.messages.append({"role": "assistant", "content": response})
+            extracted_move = self.extract_move(response)
+            return extracted_move
         if self.move_count == 2:
-            uci_move = move_from + move_to
-            san_move = self.board.san(chess.Move.from_uci(uci_move))
-            self.board.push_san(san_move)
+            root_node = pgn_game.game()
+            first_move = root_node.variations[0].move
+            initial_board = chess.Board()
+            san_move = initial_board.san(first_move)
             self.update_first_move_message(san_move)
             response = self.get_gpt_response(self.messages)
-            move = self.extract_move(response)
-            while True:
-                if self.is_legal_move(move):
-                    self.messages.append({"role": "assistant", "content": response})
-                    break
-                else:
-                    response = self.get_gpt_response(self.messages)
-                    move = self.extract_move(response)
-            return self.board.uci(chess.Move.from_uci(self.board.move_stack[1].uci()))
-        san_move = self.board.san(chess.Move.from_uci(move_from + move_to))
+            self.messages.append({"role": "assistant", "content": response})
+            extracted_move = self.extract_move(response)
+            return extracted_move
+        san_move = san
         self.messages.append({"role": "user", "content": f"{san_move}"})
-        self.board.push_san(san_move)
-        while True:
-            response = self.get_gpt_response(self.messages)
-            move = self.extract_move(response)
-            if self.is_legal_move(move):
-                self.messages.append({"role": "assistant", "content": response})
-                uci_move = self.board.peek().uci()
-                return uci_move
-            else:
-                print("not a legal move", move)
-                continue
+        response = self.get_gpt_response(self.messages)
+        self.messages.append({"role": "assistant", "content": response})
+        extracted_move = self.extract_move(response)
+        return extracted_move
 
     def get_gpt_response(self, messages):
         completion = openai.ChatCompletion.create(model=self.model, messages=messages)

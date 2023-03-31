@@ -1,21 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <!-- Google tag (gtag.js) -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-Y5SL7C9VE8"
-    ></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-
-      gtag("config", "G-Y5SL7C9VE8");
-    </script>
-    <title>LLMChess</title>
+    <title>Chess</title>
     <link
       rel="stylesheet"
       href="{{url_for('static', filename='css/chessboard-1.0.0.min.css')}}"
@@ -71,117 +57,27 @@
           Reload your browser or use the "End" button to restart the game.
         </li>
         <li>In the right-hand pane with a black border, logs appear.</li>
-        <li>
-          If the game does not respond at the beginning, restart the game.
-        </li>
-        <li>Tested in Google Chrome browser.</li>
+        <li>Only optimized for browser.</li>
         <li>
           In my experience, the only way to play a respectable game is with
           GPT-4. The system still needs improvement and is looking for
-          contributors. Discover how it functions and how to participate
-          <a href="https://maxhager.xyz/LLMChess">here</a>.
+          contributors. Discover how it functions and how to participate here
+          <a href="https://www.example.com/post">[post]</a>.
         </li>
         <li>
-          Created by <a href="https://twitter.com/MaxHager66">Max Hager</a>
+          Created by Max Hager (<a href="https://twitter.com/MaxHager66"
+            >twitter.com/MaxHager66</a
+          >)
         </li>
       </ol>
     </div>
     <script>
-      function displayLogMessage(message) {
-        var log = document.getElementById("log");
-        log.innerHTML += message + "\n";
-        log.scrollTop = log.scrollHeight; // Automatically scroll to the bottom
-      }
-
-      function createNewSession() {
-        return new Promise((resolve, reject) => {
-          $.ajax({
-            url: "/new-session",
-            method: "GET",
-            success: function (response) {
-              if (response.session_id) {
-                resolve(response.session_id);
-              } else {
-                reject("Error creating new session");
-              }
-            },
-            error: function (error) {
-              reject(error);
-            },
-          });
-        });
-      }
-
       var gameStarted = false;
       var selectedModel = document.getElementById("model-selector").value;
       document
         .getElementById("model-selector")
         .addEventListener("change", function () {
           selectedModel = this.value;
-        });
-
-      document
-        .getElementById("start-button")
-        .addEventListener("click", async function () {
-          // Check if the game is already started
-          if (gameStarted) {
-            location.reload();
-            return;
-          }
-
-          // Get the API key from the input field
-          var apiKey = document.getElementById("api-key-input").value;
-
-          // Check if the input field is empty
-          if (apiKey.trim() === "") {
-            alert("Please enter a valid API key to start the game.");
-          } else {
-            try {
-              const response = await fetch("/check-api-key", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: `api_key=${apiKey}`,
-              });
-              const data = await response.json();
-              if (data.status === "success") {
-                const setApiKeyResponse = await fetch("/set-api-key", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                  },
-                  body: `api_key=${apiKey}&model=${selectedModel}`,
-                });
-                const setApiKeyData = await setApiKeyResponse.json();
-                if (setApiKeyData.status === "success") {
-                  try {
-                    const sessionId = await createNewSession();
-                    if (sessionId) {
-                      gameStarted = true;
-                      var startButton = document.getElementById("start-button");
-                      startButton.textContent = "End";
-                      getLogs();
-                    } else {
-                      alert(
-                        "Failed to create a new session. Please try again."
-                      );
-                    }
-                  } catch (error) {
-                    console.error("Error creating new session:", error);
-                  }
-                } else {
-                  alert("Failed to set the API key. Please try again.");
-                }
-              } else {
-                alert(
-                  "The provided API key is not valid. Please enter a valid API key."
-                );
-              }
-            } catch (error) {
-              console.error("Error during the AJAX request:", error);
-            }
-          }
         });
 
       function updatePositionWithLoad(chess, source, target, piece) {
@@ -264,8 +160,9 @@
           // Game is over, do not send the move to the server
           return;
         }
-
-        sendMoveToServer(move);
+        var sanMove = game.history({ verbose: false }).slice(-1)[0];
+        //TODO Send the move to the server
+        sendMoveToServer(move, "move", sanMove);
       }
 
       function onMouseoverSquare(square, piece) {
@@ -321,80 +218,156 @@
         }
       }
 
-      function sendMoveToServer(move) {
-        const sessionId = sessionStorage.getItem("session_id");
-        // Show the waiting message
-        document.getElementById("waiting-message").style.display = "block";
-        $.ajax({
-          url: "/move",
-          method: "POST",
-          data: {
-            from: move.from,
-            to: move.to,
-            promotion: move.promotion,
-          },
-          success: function (response) {
-            // Hide the waiting message
-            document.getElementById("waiting-message").style.display = "none";
-            // Check if response.bestMove exists
-            if (response.move) {
-              var move = response.move;
-            } else {
-              //this appears much to often 
-              //this happens because somehow in engine.p 
-              console.log("something went wrong");
-            }
-            if (move) {
-              game.move(move, { sloppy: true });
-              board1.position(game.fen());
-              updateStatus();
-            }
-          },
+      //function for starting the game
+      function startGame() {
+        var apiKey = document.getElementById("api-key-input").value;
+        var model = selectedModel;
+        if (!apiKey) {
+          alert("Please enter your OpenAI API key");
+          return;
+        }
+
+        // Check the API key
+        $.post("/check-api-key", { api_key: apiKey }, function (response) {
+          if (response.status === "success") {
+            // Set API key and model in the Flask session
+            $.post(
+              "/set-api-key",
+              { api_key: apiKey, model: model },
+              function (response) {
+                if (response.status === "success") {
+                  // Start a new session and begin the game
+                  $.getJSON("/new-session", function (response) {
+                    if (response.session_id) {
+                      gameStarted = true;
+                      document.getElementById("start-button").innerHTML = "End";
+                    } else {
+                      alert("Failed to start the game");
+                    }
+                  });
+                } else {
+                  alert("Failed to set the API key and model");
+                }
+              }
+            );
+          } else {
+            alert("Invalid API key. Please check your OpenAI API key.");
+          }
         });
       }
 
-      // Function to delete the session
-      async function deleteSession() {
-        try {
-          const response = await fetch("/delete-session");
-          const data = await response.json();
-          if (data.status === "success") {
+      //event listener for start and end button
+      document
+        .getElementById("start-button")
+        .addEventListener("click", function () {
+          if (gameStarted) {
+            endGame();
           } else {
+            startGame();
           }
-        } catch (error) {}
+        });
+
+      //end a game
+      function endGame() {
+        $.getJSON("/delete-session", function (response) {
+          if (response.status === "success") {
+            location.reload();
+          } else {
+            alert("Failed to delete the session");
+          }
+        });
       }
 
-      async function getLogs() {
-        try {
-          const response = await fetch("/get_logs");
-          const data = await response.json();
-          if (data.log) {
-            // Create a new div for the log entry
-            const logEntry = document.createElement("div");
-
-            // Check if the log is an error or success, and set the color accordingly
-            if (data.log.includes("illegal")) {
-              logEntry.style.color = "red";
-            } else {
-              logEntry.style.color = "green";
-            }
-            // Set the log entry text
-            logEntry.innerHTML = data.log;
-            // Append the log entry to the log container
-            document.getElementById("log").appendChild(logEntry);
-          }
-        } catch (error) {
-          console.error("Error fetching logs:", error);
-        } finally {
-          setTimeout(getLogs, 500);
+      // Add this event listener to delete the session when the window is reloaded or closed
+      window.addEventListener("beforeunload", function (event) {
+        if (gameStarted) {
+          // Asynchronous request to delete the session
+          navigator.sendBeacon("/delete-session");
         }
-      }
-      function startRealTimeLogs() {
-        getLogs();
-        setTimeout(startRealTimeLogs, 1000);
+      });
+
+      function sendMoveToServer(move, status, sanMove) {
+        // Show a waiting message while the LLM processes the move
+        document.getElementById("waiting-message").style.display = "block";
+
+        // Send the move to the server using an AJAX POST request
+        var pgnData = game.pgn();
+        $.post(
+          "/move",
+          {
+            from: move.from,
+            to: move.to,
+            promotion: move.promotion,
+            status: status,
+            pgn: pgnData,
+            san: sanMove,
+          },
+          function (response) {
+            // Hide the waiting message
+            document.getElementById("waiting-message").style.display = "none";
+
+            if (response.error) {
+              displayLogMessage("Error: " + response.error, "error");
+            } else {
+              // Process the response from the server (e.g., update the board)
+              var opponentMove = response.move;
+
+              const chess = new Chess(game.fen());
+
+              var opponentMoveObj = chess.move(opponentMove);
+
+              if (opponentMoveObj === null) {
+                displayLogMessage(
+                  "LLM responded with illegal move: " + opponentMove, "error"
+                );
+                sendMoveToServer(move, "repeat", sanMove);
+                return;
+              }
+
+              displayLogMessage("LLM responded with move: " + opponentMove, "success");
+
+              game.load(chess.fen());
+              board1.position(chess.fen());
+
+              updateStatus();
+            }
+          }
+        ).fail(function () {
+          // Hide the waiting message
+          document.getElementById("waiting-message").style.display = "none";
+          displayLogMessage("Error: Failed to send the move to the server", "error");
+        });
       }
 
-      window.addEventListener("load", deleteSession);
+      function displayLogMessage(message, type = "default") {
+        var logElement = document.getElementById("log");
+
+        // Create a new message element
+        var messageElement = document.createElement("div");
+
+        // Set the color based on the type
+        switch (type) {
+          case "error":
+            messageElement.style.color = "red";
+            break;
+          case "success":
+            messageElement.style.color = "green";
+            break;
+          default:
+            messageElement.style.color = "black";
+        }
+
+        // Set the message text
+        messageElement.textContent = message;
+
+        // Add the message to the log
+        logElement.appendChild(messageElement);
+
+        // Scroll to the bottom of the log
+        logElement.scrollTop = logElement.scrollHeight;
+      }
+
+      //this worked! Now I need to ensure that the move is send to the backend where an request to the backend is made
     </script>
   </body>
 </html>

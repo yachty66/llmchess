@@ -1,6 +1,5 @@
 # from engine.engine import engine_instance
 from engine.engine import ChessEngine
-import threading
 import openai
 from flask import Flask, render_template, request, jsonify, session, redirect
 from flask_cors import CORS
@@ -12,31 +11,29 @@ app = Flask(__name__, template_folder=".")
 app.secret_key = "862641AD356E286C9B57DB93A9458"
 CORS(app)
 
-engine_instances_lock = threading.Lock()
 engine_instances = {}
 
 @app.route("/new-session")
 def new_session():
-    with engine_instances_lock:
-        session_id = str(uuid.uuid4())
-        session["session_id"] = session_id
-        api_key = session.get("api_key")
-        model = session.get("model")
-        engine_instances[session_id] = ChessEngine(api_key, model, session_id)
-        return {"session_id": session_id}
+    session_id = str(uuid.uuid4())
+    session["session_id"] = session_id
+    api_key = session.get("api_key")
+    model = session.get("model")
+    engine_instances[session_id] = ChessEngine(api_key, model, session_id)
+    print(engine_instances)
+    return {"session_id": session_id}
 
 @app.route("/delete-session")
 def delete_session():
-    with engine_instances_lock:
-        session_id = session.get("session_id")
-        if session_id and session_id in engine_instances:
-            # Remove the session from the engine_instances dictionary
-            del engine_instances[session_id]
-            # Delete the log file associated with the session
-            session.clear()
-            return {"status": "success"}
-        else:
-            return {"error": "Invalid session"}
+    session_id = session.get("session_id")
+    if session_id and session_id in engine_instances:
+        # Remove the session from the engine_instances dictionary
+        del engine_instances[session_id]
+        # Delete the log file associated with the session
+        session.clear()
+        return {"status": "success"}
+    else:
+        return {"error": "Invalid session"}
 
 @app.route("/get_logs", methods=["GET"])
 def get_logs():
@@ -59,18 +56,18 @@ def index():
 
 @app.route("/move", methods=["POST"])
 def move():
-    with engine_instances_lock:
-        session_id = session.get("session_id")
-        if session_id not in engine_instances:
-            return {"error": "Invalid session"}
-        engine_instance = engine_instances[session_id]
-        move_from = request.form.get("from")
-        move_to = request.form.get("to")
-        promotion = request.form.get("promotion")
-        result = engine_instance.process_move(move_from, move_to, promotion)
-        return {"move": result}
-
-
+    session_id = session.get("session_id")
+    if not session_id or session_id not in engine_instances:
+        return {"error": "Invalid session"}
+    engine_instance = engine_instances[session_id]
+    move_from = request.form.get("from")
+    move_to = request.form.get("to")
+    promotion = request.form.get("promotion")
+    status = request.form.get("status")
+    pgn_data = request.form.get("pgn")
+    san = request.form.get("san")
+    result = engine_instance.process_move(move_from, move_to, promotion, status, pgn_data, san)
+    return {"move": result}
 
 @app.route("/set-api-key", methods=["POST"])
 def set_api_key():

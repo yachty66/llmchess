@@ -1,6 +1,7 @@
 from engine.engine import ChessEngine
 import openai
 from flask import Flask, render_template, request, jsonify, session, redirect
+from flask_session import Session
 from flask_cors import CORS
 import uuid
 import os
@@ -9,6 +10,11 @@ import time
 app = Flask(__name__, template_folder=".")
 app.secret_key = "862641AD356E286C9B57DB93A9458"
 CORS(app)
+
+app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_FILE_DIR"] = "/tmp/session_data"
+app.config["SESSION_FILE_THRESHOLD"] = 100
+Session(app)
 
 engine_instances = {}
 

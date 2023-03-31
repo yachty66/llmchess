@@ -21,8 +21,6 @@ class ChessEngine:
                 ),
             }
         ]
-        self.logs = []
-        self.game_over = False
         self.api_key = api_key
         self.model = model
         self.session_id = session_id

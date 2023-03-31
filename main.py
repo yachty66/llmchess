@@ -1,22 +1,29 @@
 from engine.engine import ChessEngine
+import logging
 import openai
 from flask import Flask, render_template, request, jsonify, session, redirect
 from flask_session import Session
 from flask_cors import CORS
+from flask.sessions import SecureCookieSessionInterface
 import uuid
-import os
-import time
+from datetime import datetime
+from datetime import timedelta
+
+class PermanentSessionLifetimeInterface(SecureCookieSessionInterface):
+    def get_expiration_time(self, app, session):
+        return datetime.utcnow() + app.permanent_session_lifetime
 
 app = Flask(__name__, template_folder=".")
-app.secret_key = "862641AD356E286C9B57DB93A9458"
+app.secret_key = "sf43d5f4s394jfe2dm903"
+app.permanent_session_lifetime = timedelta(days=30)
+app.session_interface = PermanentSessionLifetimeInterface()
 CORS(app)
 
-app.config["SESSION_TYPE"] = "filesystem"
-app.config["SESSION_FILE_DIR"] = "/tmp/session_data"
-app.config["SESSION_FILE_THRESHOLD"] = 100
-Session(app)
-
 engine_instances = {}
+
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
 
 @app.route("/new-session")
 def new_session():
@@ -25,17 +32,18 @@ def new_session():
     api_key = session.get("api_key")
     model = session.get("model")
     engine_instances[session_id] = ChessEngine(api_key, model, session_id)
-    print(engine_instances)
+    logging.debug(f"New session created: {session_id}")
     return {"session_id": session_id}
 
 @app.route("/delete-session")
 def delete_session():
     session_id = session.get("session_id")
-    if session_id and session_id in engine_instances:
+    if session_id in engine_instances:
         del engine_instances[session_id]
         session.clear()
         return {"status": "success"}
     else:
+        print("invalid session in delete-session")
         return {"error": "Invalid session"}
     
 @app.route("/")
@@ -75,5 +83,7 @@ def check_api_key():
     except openai.error.AuthenticationError:
         return {"status": "failure"}
 
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=81, debug=True)
+

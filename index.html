@@ -11,7 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.min.js"></script>
   </head>
   <body>
-    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
+
     <div id="input-container">
       <input type="text" id="api-key-input" placeholder="OpenAI Key" />
       <select id="model-selector">
@@ -161,9 +161,9 @@
           // Game is over, do not send the move to the server
           return;
         }
-
+        var sanMove = game.history({ verbose: false }).slice(-1)[0]
         //TODO Send the move to the server
-        //sendMoveToServer(move);
+        sendMoveToServer(move, "move", sanMove);
       }
 
       function onMouseoverSquare(square, piece) {
@@ -228,26 +228,33 @@
           return;
         }
 
-        // Set API key and model in the Flask session
-        $.post(
-          "/set-api-key",
-          { api_key: apiKey, model: model },
-          function (response) {
-            if (response.status === "success") {
-              // Start a new session and begin the game
-              $.getJSON("/new-session", function (response) {
-                if (response.session_id) {
-                  gameStarted = true;
-                  document.getElementById("start-button").innerHTML = "End";
+        // Check the API key
+        $.post("/check-api-key", { api_key: apiKey }, function (response) {
+          if (response.status === "success") {
+            // Set API key and model in the Flask session
+            $.post(
+              "/set-api-key",
+              { api_key: apiKey, model: model },
+              function (response) {
+                if (response.status === "success") {
+                  // Start a new session and begin the game
+                  $.getJSON("/new-session", function (response) {
+                    if (response.session_id) {
+                      gameStarted = true;
+                      document.getElementById("start-button").innerHTML = "End";
+                    } else {
+                      alert("Failed to start the game");
+                    }
+                  });
                 } else {
-                  alert("Failed to start the game");
+                  alert("Failed to set the API key and model");
                 }
-              });
-            } else {
-              alert("Failed to set the API key and model");
-            }
+              }
+            );
+          } else {
+            alert("Invalid API key. Please check your OpenAI API key.");
           }
-        );
+        });
       }
 
       //event listener for start and end button
@@ -279,6 +286,66 @@
           navigator.sendBeacon("/delete-session");
         }
       });
+
+      function sendMoveToServer(move, status, sanMove) {
+        // Show a waiting message while the LLM processes the move
+        document.getElementById("waiting-message").style.display = "block";
+
+        // Send the move to the server using an AJAX POST request
+        var pgnData = game.pgn();
+        $.post(
+          "/move",
+          { from: move.from, to: move.to, promotion: move.promotion, status: status, pgn: pgnData, san: sanMove },
+          function (response) {
+            // Hide the waiting message
+            document.getElementById("waiting-message").style.display = "none";
+
+            if (response.error) {
+              displayLogMessage("Error: " + response.error);
+            } else {
+              // Process the response from the server (e.g., update the board)
+              var opponentMove = response.move;
+              console.log(opponentMove);
+
+              displayLogMessage("Opponent's move: " + opponentMove);
+
+              // Create a new Chess instance
+              const chess = new Chess(game.fen());
+
+              // Try to make the opponent's move
+              var opponentMoveObj = chess.move(opponentMove);
+
+              // Check if the opponent's move is legal (not null)
+              if (opponentMoveObj === null) {
+                /*displayLogMessage(
+                  "Error: Invalid move received from the server"
+                );*/
+
+                // Resend the move to the server if the move is not legal
+                sendMoveToServer(move, "repeat", sanMove);
+                return;
+              }
+
+              game.load(chess.fen());
+              board1.position(chess.fen());
+
+              // Update the game status and display any logs
+              updateStatus();
+            }
+          }
+        ).fail(function () {
+          // Hide the waiting message
+          document.getElementById("waiting-message").style.display = "none";
+          displayLogMessage("Error: Failed to send the move to the server");
+        });
+      }
+
+      function displayLogMessage(message) {
+        var logElement = document.getElementById("log");
+        logElement.innerHTML += message + "<br>";
+      }
+
+      //this worked! Now I need to ensure that the move is send to the backend where an request to the backend is made
     </script>
   </body>
 </html>

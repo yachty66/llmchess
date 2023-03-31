@@ -63,7 +63,11 @@ def move():
     move_from = request.form.get("from")
     move_to = request.form.get("to")
     promotion = request.form.get("promotion")
-    result = engine_instance.process_move(move_from, move_to, promotion)
+    status = request.form.get("status")
+    pgn_data = request.form.get("pgn")
+    san = request.form.get("san")
+    result = engine_instance.process_move(move_from, move_to, promotion, status, pgn_data, san)
+    print("Generated move:", result)  
     return {"move": result}
 
 @app.route("/set-api-key", methods=["POST"])

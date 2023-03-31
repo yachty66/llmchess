@@ -1,4 +1,5 @@
 import openai
+import re
 import os
 import time
 import threading
@@ -38,7 +39,15 @@ class ChessEngine:
     def set_model(self):
         self.model = self.model
 
-    def is_legal_move(self, move):
+    def extract_move(self, response):
+        response = response.split("Best move:")[1]
+        response = response.replace("...","")
+        response = response.replace("1.","")
+        response = response.replace(".","")
+        response = response.replace(" ","")
+        return response
+
+    '''def is_legal_move(self, move):
         try:
             self.board.push_san(move)
             log_message = f'LLM responded with "{move}"'
@@ -51,7 +60,7 @@ class ChessEngine:
         except ValueError:
             log_message = f'LLM responded with illegal move "{move}". Repeat request.'
             self.logs.append(log_message)
-            return False
+            return False'''
 
     def update_first_move_message(self, first_move):
         self.messages[0]["content"] = self.messages[0]["content"].format(
@@ -64,7 +73,39 @@ class ChessEngine:
         else:
             return None
 
-    def process_move(self, move_from, move_to, promotion):
+    #i.e. what we can do is we can 
+    def process_move(self, move_from, move_to, promotion, status, pgn, san):
+        pgn_game = chess.pgn.read_game(io.StringIO(pgn))
+        #pgn_board.set_epd(pgn_game.end().board().epd())
+        self.move_count += 1
+        if status == "repeat":
+            self.messages.pop()
+            response = self.get_gpt_response(self.messages)
+            self.messages.append({"role": "assistant", "content": response})
+            extracted_move = self.extract_move(response)
+            return extracted_move
+        #i can send from the frontedn some information if it is the opponents first move and based on that i can 
+        if self.move_count == 2:
+            root_node = pgn_game.game()
+            first_move = root_node.variations[0].move
+            initial_board = chess.Board()
+            san_move = initial_board.san(first_move)
+            #san_move = pgn_board.san(first_move)
+            self.update_first_move_message(san_move)
+            response = self.get_gpt_response(self.messages)
+            self.messages.append({"role": "assistant", "content": response})
+            extracted_move = self.extract_move(response)
+            #this needs to be send to the frontend again
+            return extracted_move
+        san_move = san
+        self.messages.append({"role": "user", "content": f"{san_move}"})
+        response = self.get_gpt_response(self.messages)
+        self.messages.append({"role": "assistant", "content": response})
+        extracted_move = self.extract_move(response)
+        return extracted_move
+
+    '''def process_move(self, move_from, move_to, promotion):
+        #this method is called from the server
         if self.game_over:
             return
         self.move_count += 1
@@ -111,7 +152,7 @@ class ChessEngine:
                 return uci_move
             else:
                 print("not a legal move", move)
-                continue
+                continue'''
 
     def get_gpt_response(self, messages):
         completion = openai.ChatCompletion.create(model=self.model, messages=messages)

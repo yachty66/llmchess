@@ -15,11 +15,7 @@
       <input type="text" id="api-key-input" placeholder="OpenAI Key" />
       <select id="model-selector">
         <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-        <option value="gpt-3.5-turbo-0301">gpt-3.5-turbo-0301</option>
         <option value="gpt-4">gpt-4</option>
-        <option value="gpt-4-0314">gpt-4-0314</option>
-        <option value="gpt-4-32k">gpt-4-32k</option>
-        <option value="gpt-4-32k-0314">gpt-4-32k-0314</option>
       </select>
       <button id="start-button">Start</button>
     </div>
@@ -57,14 +53,9 @@
           Reload your browser or use the "End" button to restart the game.
         </li>
         <li>In the right-hand pane with a black border, logs appear.</li>
-        <li>
-          If the game does not respond at the beginning, restart the game.
-        </li>
         <li>Tested in Google Chrome browser.</li>
         <li>
-          In my experience, the only way to play a respectable game is with
-          GPT-4. The system still needs improvement and is looking for
-          contributors. Discover how it functions and how to participate
+          Discover how the game functions and how to participate
           <a href="https://maxhager.xyz/LLMChess">here</a>.
         </li>
         <li>
@@ -314,11 +305,14 @@
               updateStatus();
             }
           }
-        ).fail(function () {
+        ).fail(function (jqXHR, textStatus, errorThrown) {
           // Hide the waiting message
           document.getElementById("waiting-message").style.display = "none";
           displayLogMessage(
-            "Error: Failed to send the move to the server",
+            "Error: Failed to send the move to the server. Status: " +
+              textStatus +
+              ", Error: " +
+              errorThrown,
             "error"
           );
         });

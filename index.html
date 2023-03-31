@@ -82,16 +82,12 @@
         });
 
       function updatePositionWithLoad(chess, source, target, piece) {
-        // Remove the piece from the source square
         chess.remove(source);
 
-        // Put the piece on the target square
         chess.put(piece, target);
 
-        // Generate the FEN string for the updated position
         var updatedFen = chess.fen();
 
-        // Load the position from the FEN string to update en passant square and castling flags
         chess.load(updatedFen);
       }
 
@@ -114,17 +110,14 @@
       board1 = ChessBoard("board1", config);
 
       function onDragStart(source, piece, position, orientation) {
-        // Do not pick up pieces if the game hasn't started
         if (!gameStarted) {
           return false;
         }
 
-        // Do not pick up pieces if the game is over
         if (game.in_checkmate() === true || game.in_draw() === true) {
           return false;
         }
 
-        // Only pick up pieces for the side to move
         if (
           (game.turn() === "w" && piece.search(/^b/) !== -1) ||
           (game.turn() === "b" && piece.search(/^w/) !== -1)
@@ -134,22 +127,18 @@
       }
 
       function onDrop(source, target) {
-        // See if the move is legal
         var move = game.move({
           from: source,
           to: target,
           promotion: "q", // NOTE: always promote to a queen for simplicity
         });
 
-        // Illegal move
         if (move === null) {
           return "snapback";
         }
 
-        // Update the board position after a legal move
         updateStatus();
 
-        // Check if the game is over
         if (
           game.in_checkmate() ||
           game.in_draw() ||
@@ -158,11 +147,9 @@
           game.insufficient_material() ||
           game.half_moves >= 100
         ) {
-          // Game is over, do not send the move to the server
           return;
         }
         var sanMove = game.history({ verbose: false }).slice(-1)[0];
-        //TODO Send the move to the server
         sendMoveToServer(move, "move", sanMove);
       }
 
@@ -175,7 +162,6 @@
       }
 
       function onSnapEnd() {
-        // Update the board position after the piece snap
         board1.position(game.fen());
       }
 
@@ -219,7 +205,6 @@
         }
       }
 
-      //function for starting the game
       function startGame() {
         var apiKey = document.getElementById("api-key-input").value;
         var model = selectedModel;
@@ -228,16 +213,13 @@
           return;
         }
 
-        // Check the API key
         $.post("/check-api-key", { api_key: apiKey }, function (response) {
           if (response.status === "success") {
-            // Set API key and model in the Flask session
             $.post(
               "/set-api-key",
               { api_key: apiKey, model: model },
               function (response) {
                 if (response.status === "success") {
-                  // Start a new session and begin the game
                   $.getJSON("/new-session", function (response) {
                     if (response.session_id) {
                       gameStarted = true;
@@ -257,7 +239,6 @@
         });
       }
 
-      //event listener for start and end button
       document
         .getElementById("start-button")
         .addEventListener("click", function () {
@@ -279,10 +260,8 @@
         });
       }
 
-      // Add this event listener to delete the session when the window is reloaded or closed
       window.addEventListener("beforeunload", function (event) {
         if (gameStarted) {
-          // Asynchronous request to delete the session
           navigator.sendBeacon("/delete-session");
         }
       });
@@ -291,7 +270,6 @@
         // Show a waiting message while the LLM processes the move
         document.getElementById("waiting-message").style.display = "block";
 
-        // Send the move to the server using an AJAX POST request
         var pgnData = game.pgn();
         $.post(
           "/move",
@@ -310,7 +288,6 @@
             if (response.error) {
               displayLogMessage("Error: " + response.error, "error");
             } else {
-              // Process the response from the server (e.g., update the board)
               var opponentMove = response.move;
 
               const chess = new Chess(game.fen());
@@ -365,13 +342,10 @@
             messageElement.style.color = "black";
         }
 
-        // Set the message text
         messageElement.textContent = message;
 
-        // Add the message to the log
         logElement.appendChild(messageElement);
 
-        // Scroll to the bottom of the log
         logElement.scrollTop = logElement.scrollHeight;
       }
     </script>

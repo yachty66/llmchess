@@ -1,4 +1,3 @@
-# from engine.engine import engine_instance
 from engine.engine import ChessEngine
 import openai
 from flask import Flask, render_template, request, jsonify, session, redirect
@@ -27,28 +26,11 @@ def new_session():
 def delete_session():
     session_id = session.get("session_id")
     if session_id and session_id in engine_instances:
-        # Remove the session from the engine_instances dictionary
         del engine_instances[session_id]
-        # Delete the log file associated with the session
         session.clear()
         return {"status": "success"}
     else:
         return {"error": "Invalid session"}
-
-@app.route("/get_logs", methods=["GET"])
-def get_logs():
-    #only run this method if new session is created
-    session_id = session.get("session_id")
-    if session_id and session_id in engine_instances:
-        engine_instance = engine_instances[session_id]
-        while True:  # Add this line
-            log = engine_instance.get_next_log()  # Implement this method
-            if log:
-                return {"log": log}
-            else:
-                time.sleep(0.5)  # Sleep for 500 milliseconds and try again
-    else:
-        return {"error": "Session not started"}
     
 @app.route("/")
 def index():
